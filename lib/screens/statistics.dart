@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// StatisticsScreen 클래스: 통계 화면을 구성하는 메인 화면 위젯
 class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -7,7 +8,7 @@ class StatisticsScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // 상단 영역: "통계" 타이틀까지만 배경 적용
+            // 상단 영역 배경 및 타이틀
             Container(
               color: Colors.teal[300],
               padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
@@ -30,7 +31,7 @@ class StatisticsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            // 통계 아이콘 목록
+            // 통계 아이콘 목록: 수평 스크롤 가능
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: SingleChildScrollView(
@@ -53,11 +54,13 @@ class StatisticsScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 20),
-                  RatingCard(),
+                  RatingCard(), // 별점 평균 카드
                   SizedBox(height: 20),
-                  MonthHeader(title: '1월'),
-                  CustomBookStatTile(title: '책 제목', days: '3일', rating: 5),
-                  CustomBookStatTile(title: '책 제목', days: '15일', rating: 4),
+                  MonthHeader(title: '1월'), // 월 헤더
+                  CustomBookStatTile(
+                      title: '책 제목', days: '3일', rating: 5), // 책 정보 카드
+                  CustomBookStatTile(
+                      title: '책 제목', days: '15일', rating: 4), // 또 다른 책 정보 카드
                 ],
               ),
             ),
@@ -68,9 +71,10 @@ class StatisticsScreen extends StatelessWidget {
   }
 }
 
+// StatCard 클래스: 통계 아이콘 카드 위젯
 class StatCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
+  final String title; // 카드 제목
+  final IconData icon; // 카드에 표시할 아이콘
 
   StatCard({required this.title, required this.icon});
 
@@ -81,9 +85,9 @@ class StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
-            Icon(icon, size: 30),
+            Icon(icon, size: 30), // 아이콘
             SizedBox(height: 10),
-            Text(title, style: TextStyle(fontSize: 14)),
+            Text(title, style: TextStyle(fontSize: 14)), // 제목 텍스트
           ],
         ),
       ),
@@ -91,11 +95,13 @@ class StatCard extends StatelessWidget {
   }
 }
 
+// RatingCard 클래스: 별점 평균을 표시하는 카드 위젯
 class RatingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
+        // 별점 카드 본체
         Card(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -112,6 +118,7 @@ class RatingCard extends StatelessWidget {
             ),
           ),
         ),
+        // "별점 평균" 텍스트 위치 조정 (카드 상단에 걸쳐 위치)
         Positioned(
           left: 16,
           top: 0,
@@ -129,10 +136,11 @@ class RatingCard extends StatelessWidget {
   }
 }
 
+// CustomBookStatTile 클래스: 책 제목, 별점, 날짜 등의 정보를 표시하는 리스트 아이템 위젯
 class CustomBookStatTile extends StatelessWidget {
-  final String title;
-  final String days;
-  final int rating;
+  final String title; // 책 제목
+  final String days; // 읽은 날짜 정보
+  final int rating; // 별점
 
   CustomBookStatTile(
       {required this.title, required this.days, required this.rating});
@@ -143,6 +151,7 @@ class CustomBookStatTile extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 12),
       child: Stack(
         children: [
+          // 카드 본체
           Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -212,8 +221,9 @@ class CustomBookStatTile extends StatelessWidget {
   }
 }
 
+// MonthHeader 클래스: "월"과 함께 구분선을 표시하는 헤더 위젯
 class MonthHeader extends StatelessWidget {
-  final String title;
+  final String title; // 헤더의 제목 (예: "1월")
 
   MonthHeader({required this.title});
 
@@ -228,7 +238,7 @@ class MonthHeader extends StatelessWidget {
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           SizedBox(width: 8),
-          Expanded(child: Divider(thickness: 1, color: Colors.grey)),
+          Expanded(child: Divider(thickness: 1, color: Colors.grey)), // 구분선
         ],
       ),
     );
