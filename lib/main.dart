@@ -14,10 +14,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'ReadLog',
       theme: ThemeData(
-        primarySwatch: Colors.teal,
+        primarySwatch: Colors.teal, // 앱의 기본 색상 설정
       ),
-      // 앱 실행 시 SplashScreen이 표시되도록 설정
-      home: const SplashScreen(),
+      home: const SplashScreen(), // 앱의 시작 화면 설정
     );
   }
 }

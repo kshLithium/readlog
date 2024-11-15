@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'direct_add_book_screen.dart';
+import 'search_book_screen.dart';
 
 class BookAddScreen extends StatelessWidget {
   const BookAddScreen({Key? key}) : super(key: key);
@@ -29,9 +31,11 @@ class BookAddScreen extends StatelessWidget {
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    // 검색해서 등록 로직 추가
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('검색해서 등록하기 클릭됨')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchBookScreen(),
+                      ),
                     );
                   },
                   child: Container(
@@ -55,13 +59,16 @@ class BookAddScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(width: 20.0),
               // 직접 등록하기 버튼
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    // 직접 등록 로직 추가
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('직접 등록하기 클릭됨')),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const DirectAddBookScreen(),
+                      ),
                     );
                   },
                   child: Container(

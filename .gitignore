@@ -41,3 +41,23 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 시스템 디렉토리 및 파일 제외
+AppData/
+.android/
+.vscode/
+.gradle/
+.cache/
+.config/
+.gitconfig
+.eclipse/
+ntuser.*
+
+# OS별 불필요한 파일 제외
+Thumbs.db
+.DS_Store
+
+# IDE 설정 파일 제외
+.idea/
+*.iml
+
