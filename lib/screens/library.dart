@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:vscode_app/main.dart';
-import 'package:vscode_app/review.dart';
+import 'home_screen.dart';
+import 'review.dart';
 
 // 서재 관리 화면을 위한 LibraryScreen 위젯
 class LibraryScreen extends StatelessWidget {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:vscode_app/library.dart'; // 서재 관리 화면을 위한 라이브러리 import
+import 'library.dart'; // 서재 관리 화면을 위한 라이브러리 import
 
 // 앱의 진입점
 void main() {
