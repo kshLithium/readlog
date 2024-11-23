@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:readlog/screens/book_add_screen.dart';
+import 'package:readlog/screens/mypage.dart';
+import 'package:readlog/screens/remember.dart';
 import 'library.dart'; // 서재 관리 화면을 위한 라이브러리 import
 
 // 앱의 진입점
@@ -47,15 +50,24 @@ class HomeScreen extends StatelessWidget {
                       size: 200,
                       color: const Color.fromARGB(255, 89, 134, 129), // 아이콘 색상
                     ),
-                    onPressed: () {}, // 버튼 동작 정의 필요
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                BookAddScreen()), // 책 추가 화면으로 이동
+                      );
+                    }, // 버튼 동작 정의 필요
                   ),
-                  SizedBox(height: 1),
-                  Text(
-                    "\n\n\n책   추가", // 아이콘 위에 표시할 텍스트
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white, // 텍스트 색상
+                  // SizedBox(height: 1),
+                  IgnorePointer(
+                    child: Text(
+                      "\n\n\n책   추가", // 아이콘 위에 표시할 텍스트
+                      style: TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // 텍스트 색상
+                      ),
                     ),
                   ),
                 ],
@@ -159,7 +171,14 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   color: const Color.fromARGB(255, 89, 134, 129),
                   child: TextButton(
-                    onPressed: () {}, // 동작 정의 필요
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                RememberScreen()), // 기억하기 화면으로 이동
+                      );
+                    }, // 동작 정의 필요
                     child: Text("기억하기"),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
@@ -178,7 +197,13 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   color: const Color.fromARGB(255, 89, 134, 129),
                   child: TextButton(
-                    onPressed: () {}, // 동작 정의 필요
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyPage()), // 서재 화면으로 이동
+                      );
+                    }, // 동작 정의 필요
                     child: Text("마이페이지"),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,

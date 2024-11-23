@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'book_add_screen.dart';
 
+// 안쓸거 같음
+
 class MainScreen extends StatelessWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -21,7 +23,8 @@ class MainScreen extends StatelessWidget {
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.teal,
-            padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 15.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 40.0, vertical: 15.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10.0),
             ),

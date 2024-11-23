@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readlog/screens/home_screen.dart';
 import 'main_screen.dart'; // 메인 화면 import
 import 'signup_screen.dart';
 
@@ -77,7 +78,7 @@ class LoginScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => const MainScreen(),
+                      builder: (context) => HomeScreen(),
                     ),
                   );
                 },
