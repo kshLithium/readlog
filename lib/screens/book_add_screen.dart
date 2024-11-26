@@ -67,7 +67,9 @@ class BookAddScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const DirectAddBookScreen(),
+                        builder: (context) => const DirectAddBookScreen(
+                          isEditable: true,
+                        ),
                       ),
                     );
                   },

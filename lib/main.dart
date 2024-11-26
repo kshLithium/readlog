@@ -6,6 +6,7 @@ import 'package:readlog/screens/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  // WidgetsFlutterBinding.ensureInitialized(); // 초기화
   await dotenv.load(); // .env 파일 로드
   runApp(const MyApp());
 }

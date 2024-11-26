@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'direct_add_book_screen.dart';
 
 class BookSearchScreen extends StatefulWidget {
   @override
@@ -109,7 +110,25 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
     }
   }
 
-  @override
+  // 선택한 책 정보 전달
+  void _onBookSelected(dynamic book) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DirectAddBookScreen(
+          title: book['title'], // 책 제목
+          author: book['author'], // 저자
+          publisher: book['publisher'], // 출판사
+          isbn: book['isbn'], // ISBN
+          pages: book['price'], // 페이지수는 상세검색 API에서 제공하지 않음
+          description: book['description'], // 책 설명
+          thumbnailUrl: book['image'], // 썸네일 URL
+          isEditable: false, // 이미지 변경 불가능
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,31 +210,35 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
                       return const Center(child: CircularProgressIndicator());
                     }
                     final book = _books[index];
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: ListTile(
-                          leading: book['image'] != null
-                              ? Image.network(
-                                  book['image'],
-                                  height: 50,
-                                  width: 50,
-                                  fit: BoxFit.cover,
-                                )
-                              : const Icon(Icons.book, size: 50),
-                          title: Text(
-                            book['title'],
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                    return GestureDetector(
+                      onTap: () => _onBookSelected(book),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        child: Card(
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: ListTile(
+                            leading: book['image'] != null
+                                ? Image.network(
+                                    book['image'],
+                                    height: 50,
+                                    width: 50,
+                                    fit: BoxFit.cover,
+                                  )
+                                : const Icon(Icons.book, size: 50),
+                            title: Text(
+                              book['title'],
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              "저자: ${book['author']}\n출판사: ${book['publisher']}",
+                              style: const TextStyle(fontSize: 12.0),
+                            ),
+                            isThreeLine: true,
                           ),
-                          subtitle: Text(
-                            "저자: ${book['author']}\n출판사: ${book['publisher']}",
-                            style: const TextStyle(fontSize: 12.0),
-                          ),
-                          isThreeLine: true,
                         ),
                       ),
                     );
