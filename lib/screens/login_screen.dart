@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:readlog/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'reset_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -118,6 +119,21 @@ class _LoginScreenState extends State<LoginScreen> {
                   },
                   child: const Text(
                     '회원가입',
+                    style: TextStyle(color: Colors.teal),
+                  ),
+                ),
+                const Text('|'), // 구분선 추가
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ResetPasswordScreen(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    '비밀번호 재설정',
                     style: TextStyle(color: Colors.teal),
                   ),
                 ),

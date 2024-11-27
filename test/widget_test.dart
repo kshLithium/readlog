@@ -7,24 +7,41 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:readlog/main.dart';
+import 'package:readlog/screens/reset_password_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('ResetPasswordScreen UI test', (WidgetTester tester) async {
+    // ResetPasswordScreen 위젯 빌드
+    await tester.pumpWidget(const MaterialApp(
+      home: ResetPasswordScreen(),
+    ));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // 앱바 타이틀 확인
+    expect(find.text('비밀번호 재설정'), findsOneWidget);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // 안내 텍스트 확인
+    expect(find.text('새로운 비밀번호를 설정하세요.'), findsOneWidget);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // 비밀번호 입력 필드 확인
+    expect(find.text('새 비밀번호'), findsOneWidget);
+    expect(find.text('비밀번호 확인'), findsOneWidget);
+
+    // 텍스트필드 힌트 텍스트 확인
+    expect(find.text('새 비밀번호를 입력해주세요'), findsOneWidget);
+    expect(find.text('비밀번호를 다시 입력해주세요'), findsOneWidget);
+
+    // 재설정 버튼 확인
+    expect(find.text('비밀번호 재설정'), findsOneWidget);
+
+    // 비밀번호 입력
+    await tester.enterText(find.byType(TextField).first, 'newpassword123');
+    await tester.enterText(find.byType(TextField).last, 'newpassword123');
+
+    // 재설정 버튼 탭
+    await tester.tap(find.byType(ElevatedButton));
+    await tester.pumpAndSettle();
+
+    // 스낵바 메시지 확인
+    expect(find.text('비밀번호가 재설정되었습니다.'), findsOneWidget);
   });
 }
