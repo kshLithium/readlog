@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "212555878819",
+    "project_id": "readlog-e631e",
+    "storage_bucket": "readlog-e631e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:212555878819:android:d32e226b99ebaf600c4a16",
+        "android_client_info": {
+          "package_name": "com.readlog.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0K1UHAQzLUJUa4nBNfra9fBIwAOnLL6Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
