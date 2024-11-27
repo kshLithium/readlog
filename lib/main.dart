@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:readlog/screens/home_screen.dart';
-import 'package:readlog/screens/library.dart';
-import 'package:readlog/screens/main_screen.dart';
 import 'package:readlog/screens/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
