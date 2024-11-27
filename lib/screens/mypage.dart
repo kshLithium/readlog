@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:readlog/screens/login_screen.dart';
 
 class MyPage extends StatelessWidget {
   @override
@@ -100,6 +102,25 @@ class MyPage extends StatelessWidget {
                       foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
                     ),
                     child: Text("통계 보기"), // 버튼 텍스트
+                  ),
+                  Divider(),
+                  // 로그아웃 버튼 추가
+                  TextButton(
+                    onPressed: () async {
+                      await FirebaseAuth.instance.signOut();
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                        (route) => false,
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size(50, 30),
+                      alignment: Alignment.centerLeft,
+                      foregroundColor: Colors.black,
+                    ),
+                    child: Text("로그아웃"),
                   ),
                 ],
               ),

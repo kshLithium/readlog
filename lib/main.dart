@@ -3,6 +3,9 @@ import 'package:readlog/screens/splash_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:readlog/screens/login_screen.dart';
+import 'package:readlog/screens/home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 초기화
@@ -25,7 +28,20 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal, // 앱의 기본 색상 설정
       ),
-      home: SplashScreen(), // 앱의 시작 화면 설정
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen();
+          }
+
+          if (snapshot.hasData) {
+            return HomeScreen(); // 로그인된 상태
+          }
+
+          return const LoginScreen(); // 로그인되지 않은 상태
+        },
+      ),
     );
   }
 }
