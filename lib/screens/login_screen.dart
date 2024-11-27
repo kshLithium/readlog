@@ -1,9 +1,63 @@
 import 'package:flutter/material.dart';
 import 'package:readlog/screens/home_screen.dart';
 import 'signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<void> _signIn() async {
+    try {
+      UserCredential credential = await _auth.signInWithEmailAndPassword(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+
+      if (credential.user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      }
+    } on FirebaseAuthException catch (error) {
+      String message = '로그인에 실패했습니다.';
+
+      switch (error.code) {
+        case "invalid-email":
+          message = '잘못된 이메일 형식입니다.';
+          break;
+        case "user-disabled":
+          message = '비활성화된 계정입니다.';
+          break;
+        case "user-not-found":
+          message = '존재하지 않는 계정입니다.';
+          break;
+        case "wrong-password":
+          message = '잘못된 비밀번호입니다.';
+          break;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,18 +82,20 @@ class LoginScreen extends StatelessWidget {
             const SizedBox(height: 20.0),
             const Text('아이디'),
             const SizedBox(height: 5.0),
-            const TextField(
-              decoration: InputDecoration(
-                hintText: '아이디를 입력해주세요',
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(
+                hintText: '이메일을 입력해주세요',
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 20.0),
             const Text('비밀번호'),
             const SizedBox(height: 5.0),
-            const TextField(
+            TextField(
+              controller: _passwordController,
               obscureText: true,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: '비밀번호를 입력해주세요',
                 border: OutlineInputBorder(),
                 suffixIcon: Icon(Icons.visibility_off),
@@ -72,15 +128,7 @@ class LoginScreen extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // 로그인 성공 시 메인 화면으로 이동
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomeScreen(),
-                    ),
-                  );
-                },
+                onPressed: _signIn,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(vertical: 15.0),
