@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Image Picker 패키지 추가
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class DirectAddBookScreen extends StatefulWidget {
   final String? title;
@@ -29,11 +31,21 @@ class DirectAddBookScreen extends StatefulWidget {
 
 class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
   String? _thumbnailUrl;
+  final TextEditingController _titleController = TextEditingController();
+  final TextEditingController _authorController = TextEditingController();
+  final TextEditingController _publisherController = TextEditingController();
+  final TextEditingController _isbnController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _thumbnailUrl = widget.thumbnailUrl;
+    _titleController.text = widget.title ?? '';
+    _authorController.text = widget.author ?? '';
+    _publisherController.text = widget.publisher ?? '';
+    _isbnController.text = widget.isbn ?? '';
+    _descriptionController.text = widget.description ?? '';
   }
 
   void _pickImage() async {
@@ -59,6 +71,45 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
     }
   }
 
+  Future<void> _saveBookToFirestore() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('로그인이 필요합니다.')),
+        );
+        return;
+      }
+
+      final bookData = {
+        'title': _titleController.text,
+        'author': _authorController.text,
+        'publisher': _publisherController.text,
+        'isbn': _isbnController.text,
+        'description': _descriptionController.text,
+        'thumbnailUrl': _thumbnailUrl,
+        'userId': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('books')
+          .add(bookData);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('책 정보가 저장되었습니다.')),
+      );
+
+      Navigator.pop(context); // 저장 후 이전 화면으로 돌아가기
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 중 오류가 발생했습니다: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,12 +118,7 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.send, color: Colors.blue),
-            onPressed: () {
-              // 책 저장 로직 추가 (나중에 구현)
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('책 정보가 저장되었습니다.')),
-              );
-            },
+            onPressed: _saveBookToFirestore,
           ),
         ],
       ),
@@ -111,31 +157,31 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
             ),
             const SizedBox(height: 20.0),
             // 책 제목 입력
-            _buildTextField('책 제목', widget.title),
+            _buildTextField('책 제목', _titleController),
             const SizedBox(height: 10.0),
             // 저자 입력
-            _buildTextField('저자', widget.author),
+            _buildTextField('저자', _authorController),
             const SizedBox(height: 10.0),
             // 출판사 입력
-            _buildTextField('출판사', widget.publisher),
+            _buildTextField('출판사', _publisherController),
             const SizedBox(height: 10.0),
             // ISBN 입력
-            _buildTextField('ISBN', widget.isbn),
+            _buildTextField('ISBN', _isbnController),
             const SizedBox(height: 10.0),
             // 페이지 수 입력
             // _buildTextField('페이지 수', widget.pages),
             // const SizedBox(height: 10.0),
             // 책 소개 입력 (텍스트 박스 높이 자동 조절)
-            _buildMultiLineTextField('책 소개', widget.description),
+            _buildMultiLineTextField('책 소개', _descriptionController),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildTextField(String label, String? initialValue) {
+  Widget _buildTextField(String label, TextEditingController controller) {
     return TextField(
-      controller: TextEditingController(text: initialValue),
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
@@ -143,9 +189,10 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
     );
   }
 
-  Widget _buildMultiLineTextField(String label, String? initialValue) {
+  Widget _buildMultiLineTextField(
+      String label, TextEditingController controller) {
     return TextField(
-      controller: TextEditingController(text: initialValue),
+      controller: controller,
       maxLines: null, // 줄바꿈 자동 처리
       keyboardType: TextInputType.multiline,
       decoration: InputDecoration(
