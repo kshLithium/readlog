@@ -7,8 +7,8 @@ class DirectAddBookScreen extends StatefulWidget {
   final String? author;
   final String? publisher;
   final String? isbn;
-  final String? pages;
   final String? description;
+  //final String? pages;
   final String? thumbnailUrl;
   final bool isEditable; // 이미지 변경 가능 여부 추가
 
@@ -18,7 +18,6 @@ class DirectAddBookScreen extends StatefulWidget {
     this.author,
     this.publisher,
     this.isbn,
-    this.pages,
     this.description,
     this.thumbnailUrl,
     this.isEditable = true, // 기본값: 사용자가 변경 가능
@@ -124,8 +123,8 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
             _buildTextField('ISBN', widget.isbn),
             const SizedBox(height: 10.0),
             // 페이지 수 입력
-            _buildTextField('페이지 수', widget.pages),
-            const SizedBox(height: 10.0),
+            // _buildTextField('페이지 수', widget.pages),
+            // const SizedBox(height: 10.0),
             // 책 소개 입력 (텍스트 박스 높이 자동 조절)
             _buildMultiLineTextField('책 소개', widget.description),
           ],

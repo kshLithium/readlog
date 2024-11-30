@@ -120,7 +120,7 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
           author: book['author'], // 저자
           publisher: book['publisher'], // 출판사
           isbn: book['isbn'], // ISBN
-          pages: book['price'], // 페이지수는 상세검색 API에서 제공하지 않음
+          // pages: book['price'], // 페이지수는 API에서 제공하지 않아서 추가 안함
           description: book['description'], // 책 설명
           thumbnailUrl: book['image'], // 썸네일 URL
           isEditable: false, // 이미지 변경 불가능
