@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'home_screen.dart';
-import 'review.dart';
+import 'book_detail_screen.dart';
 
 // 서재 관리 화면을 위한 LibraryScreen 위젯
 class LibraryScreen extends StatelessWidget {
@@ -13,7 +12,10 @@ class LibraryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("서재관리",
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+                color: Colors.white)),
         elevation: 0, // 앱바 그림자 제거
         backgroundColor: Color(0xFF597E81), // 테마 색상으로 통일
       ),
@@ -125,7 +127,7 @@ class LibraryScreen extends StatelessWidget {
                               context,
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    ReviewScreen(bookIndex: index),
+                                    BookDetailScreen(bookId: doc.id),
                               ),
                             );
                           },
