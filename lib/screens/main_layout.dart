@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'library.dart';
-import 'remember.dart';
+import 'memory_screen.dart';
 import 'mypage.dart';
-// 다른 화면들 import
 
 class MainLayout extends StatefulWidget {
   const MainLayout({Key? key}) : super(key: key);
@@ -18,7 +17,7 @@ class _MainLayoutState extends State<MainLayout> {
   final List<Widget> _screens = [
     HomeScreen(),
     LibraryScreen(),
-    RememberScreen(),
+    MemoryScreen(),
     MyPage(),
   ];
 
