@@ -53,8 +53,15 @@ class LibraryScreen extends StatelessWidget {
                       .collection('books')
                       .snapshots(),
                   builder: (context, snapshot) {
-                    int bookCount =
-                        snapshot.hasData ? snapshot.data!.docs.length : 0;
+                    int bookCount = 0;
+                    if (snapshot.hasData) {
+                      bookCount = snapshot.data!.docs
+                          .where((doc) =>
+                              (doc.data()
+                                  as Map<String, dynamic>)['readingState'] ==
+                              'reading')
+                          .length;
+                    }
 
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +78,7 @@ class LibraryScreen extends StatelessWidget {
                             Icon(Icons.book,
                                 color: Color(0xFF597E81), size: 24),
                             SizedBox(width: 8),
-                            Text('$bookCount권의 책을 읽었어요',
+                            Text('$bookCount권의 책을 읽고 있어요',
                                 style: TextStyle(
                                   fontSize: 20,
                                   color: Colors.black54,
