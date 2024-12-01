@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:readlog/screens/login_screen.dart';
+import 'statistics.dart'; // import 추가
 
 class MyPage extends StatelessWidget {
   @override
@@ -93,15 +94,20 @@ class MyPage extends StatelessWidget {
                   // "통계 보기" 버튼
                   TextButton(
                     onPressed: () {
-                      // 통계 보기 페이지로 이동하는 로직 추가
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StatisticsScreen(),
+                        ),
+                      );
                     },
                     style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero, // 버튼 내부 여백 제거
-                      minimumSize: Size(50, 30), // 버튼 최소 크기 설정
-                      alignment: Alignment.centerLeft, // 텍스트 왼쪽 정렬
-                      foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size(50, 30),
+                      alignment: Alignment.centerLeft,
+                      foregroundColor: Colors.black,
                     ),
-                    child: Text("통계 보기"), // 버튼 텍스트
+                    child: Text("통계 보기"),
                   ),
                   Divider(),
                   // 로그아웃 버튼 추가

@@ -3,6 +3,7 @@ import 'package:readlog/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'reset_password_screen.dart';
+import 'main_layout.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (credential.user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeScreen()),
+          MaterialPageRoute(builder: (context) => MainLayout()),
         );
       }
     } on FirebaseAuthException catch (error) {
