@@ -137,7 +137,11 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               return Center(child: CircularProgressIndicator());
             }
 
-            final bookData = snapshot.data!.data() as Map<String, dynamic>;
+            final bookData = snapshot.data?.data() as Map<String, dynamic>?;
+
+            if (bookData == null) {
+              return Center(child: Text('책 데이터를 불러올 수 없습니다.'));
+            }
 
             return SingleChildScrollView(
               child: Padding(
