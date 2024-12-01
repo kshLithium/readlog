@@ -5,14 +5,25 @@ import 'memory_screen.dart';
 import 'mypage.dart';
 
 class MainLayout extends StatefulWidget {
-  const MainLayout({Key? key}) : super(key: key);
+  final int initialIndex;
+
+  const MainLayout({
+    Key? key,
+    this.initialIndex = 0,
+  }) : super(key: key);
 
   @override
   State<MainLayout> createState() => _MainLayoutState();
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.initialIndex;
+  }
 
   final List<Widget> _screens = [
     HomeScreen(),

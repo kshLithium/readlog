@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'edit_screen.dart';
+import 'main_layout.dart';
 
 class BookDetailScreen extends StatefulWidget {
   final String bookId;
@@ -63,7 +64,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         return '읽는 중';
       case 'not_started':
       default:
-        return '아직 안 읽음';
+        return '안 읽음';
     }
   }
 
@@ -89,6 +90,63 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         .collection('books')
         .doc(widget.bookId)
         .update({'readingState': newState});
+  }
+
+  Future<void> _deleteBook() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) throw Exception('로그인이 필요합니다.');
+
+      // 삭제 확인 다이얼로그
+      bool? confirmDelete = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('삭제 확인'),
+          content: Text('정말로 이 책을 삭제하시겠습니까?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('취소'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('삭제'),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.red,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmDelete == true) {
+        // 책 삭제
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .collection('books')
+            .doc(widget.bookId)
+            .delete();
+
+        // 삭제 완료 메시지
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('책이 삭제되었습니다.')),
+        );
+
+        // MainLayout의 LibraryScreen으로 이동
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainLayout(initialIndex: 1),
+          ),
+          (route) => false,
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('삭제 중 오류가 발생했습니다: $e')),
+      );
+    }
   }
 
   @override
@@ -241,7 +299,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                                   },
                                                 ),
                                                 ListTile(
-                                                  title: Text('아직 안 읽음'),
+                                                  title: Text('안 읽음'),
                                                   onTap: () {
                                                     _updateReadingState(
                                                         'not_started');
@@ -448,26 +506,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        onPressed: () async {
-                          if (user != null) {
-                            try {
-                              await FirebaseFirestore.instance
-                                  .collection('users')
-                                  .doc(user.uid)
-                                  .collection('books')
-                                  .doc(widget.bookId)
-                                  .delete();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('항목이 삭제되었습니다.')),
-                              );
-                              Navigator.pop(context);
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('삭제에 실패했습니다: $e')),
-                              );
-                            }
-                          }
-                        },
+                        onPressed: _deleteBook,
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 15),
                           child: Text(

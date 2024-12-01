@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'library.dart';
+import 'main_layout.dart';
 
 class EditScreen extends StatefulWidget {
   final String? bookId;
@@ -62,9 +62,12 @@ class _EditReviewScreenState extends State<EditScreen> {
           SnackBar(content: Text('수정이 완료되었습니다.')),
         );
 
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => LibraryScreen()),
+          MaterialPageRoute(
+            builder: (context) => MainLayout(initialIndex: 1),
+          ),
+          (route) => false,
         );
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
