@@ -14,6 +14,7 @@ class BookDetailScreen extends StatefulWidget {
 class _BookDetailScreenState extends State<BookDetailScreen> {
   bool isExpanded = false;
   int localRating = 0;
+  String readingState = 'not_started';
 
   @override
   void initState() {
@@ -28,6 +29,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       if (doc.exists) {
         setState(() {
           localRating = doc.data()?['rating'] ?? 0;
+          readingState = doc.data()?['readingState'] ?? 'not_started';
         });
       }
     });
@@ -50,6 +52,42 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     setState(() {
       localRating = rating;
     });
+  }
+
+  String _getStateText(String state) {
+    switch (state) {
+      case 'completed':
+        return '다 읽음';
+      case 'reading':
+        return '읽는 중';
+      case 'not_started':
+      default:
+        return '아직 안 읽음';
+    }
+  }
+
+  Color _getStateColor(String state) {
+    switch (state) {
+      case 'completed':
+        return Colors.green;
+      case 'reading':
+        return Colors.blue;
+      case 'not_started':
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _updateReadingState(String newState) {
+    setState(() {
+      readingState = newState;
+    });
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('books')
+        .doc(widget.bookId)
+        .update({'readingState': newState});
   }
 
   @override
@@ -132,38 +170,106 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // 책 표지 이미지
-                              Container(
-                                width: 130,
-                                height: 180,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 8,
-                                      offset: Offset(2, 2),
-                                    ),
-                                  ],
-                                  image: bookData['thumbnailUrl'] != null
-                                      ? DecorationImage(
-                                          image: NetworkImage(
-                                              bookData['thumbnailUrl']),
-                                          fit: BoxFit.cover,
-                                        )
-                                      : null,
-                                ),
-                                child: bookData['thumbnailUrl'] == null
-                                    ? Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[200],
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 130,
+                                    height: 180,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black26,
+                                          blurRadius: 8,
+                                          offset: Offset(2, 2),
                                         ),
-                                        child: Icon(Icons.book,
-                                            size: 50, color: Colors.grey[400]),
-                                      )
-                                    : null,
+                                      ],
+                                      image: bookData['thumbnailUrl'] != null
+                                          ? DecorationImage(
+                                              image: NetworkImage(
+                                                  bookData['thumbnailUrl']),
+                                              fit: BoxFit.cover,
+                                            )
+                                          : null,
+                                    ),
+                                    child: bookData['thumbnailUrl'] == null
+                                        ? Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey[200],
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                            ),
+                                            child: Icon(Icons.book,
+                                                size: 50,
+                                                color: Colors.grey[400]),
+                                          )
+                                        : null,
+                                  ),
+                                  Positioned(
+                                    bottom: 0,
+                                    right: 0,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) => AlertDialog(
+                                            title: Text('읽기 상태 변경'),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                ListTile(
+                                                  title: Text('다 읽음'),
+                                                  onTap: () {
+                                                    _updateReadingState(
+                                                        'completed');
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                  title: Text('읽는 중'),
+                                                  onTap: () {
+                                                    _updateReadingState(
+                                                        'reading');
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                                ListTile(
+                                                  title: Text('아직 안 읽음'),
+                                                  onTap: () {
+                                                    _updateReadingState(
+                                                        'not_started');
+                                                    Navigator.pop(context);
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: _getStateColor(readingState),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(8),
+                                            bottomRight: Radius.circular(10),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _getStateText(readingState),
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               SizedBox(width: 20),
                               Expanded(

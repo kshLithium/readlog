@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:readlog/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'reset_password_screen.dart';
