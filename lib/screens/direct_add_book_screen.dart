@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Image Picker 패키지 추가
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart'; // 이미지 선택 패키지
+import 'progress_check_screen.dart'; // 책 진도 체크 화면
 
 class DirectAddBookScreen extends StatefulWidget {
   final String? title;
@@ -10,9 +9,8 @@ class DirectAddBookScreen extends StatefulWidget {
   final String? publisher;
   final String? isbn;
   final String? description;
-  //final String? pages;
   final String? thumbnailUrl;
-  final bool isEditable; // 이미지 변경 가능 여부 추가
+  final bool isEditable; // 이미지 변경 가능 여부
 
   const DirectAddBookScreen({
     Key? key,
@@ -36,11 +34,12 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
   final TextEditingController _publisherController = TextEditingController();
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _thumbnailUrl = widget.thumbnailUrl;
+    _thumbnailUrl = widget.thumbnailUrl; // 기존 썸네일 URL
     _titleController.text = widget.title ?? '';
     _authorController.text = widget.author ?? '';
     _publisherController.text = widget.publisher ?? '';
@@ -48,156 +47,114 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
     _descriptionController.text = widget.description ?? '';
   }
 
-  void _pickImage() async {
-    if (!widget.isEditable) {
-      return; // 이미지를 변경할 수 없는 경우 동작하지 않음
-    }
-
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
+  // 이미지 선택 함수
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
       setState(() {
-        _thumbnailUrl = image.path; // 선택한 이미지의 로컬 파일 경로 저장
+        _thumbnailUrl = pickedFile.path;
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지를 선택했습니다.')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지 선택이 취소되었습니다.')),
-      );
     }
   }
 
-  Future<void> _saveBookToFirestore() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인이 필요합니다.')),
-        );
-        return;
-      }
-
-      final bookData = {
-        'title': _titleController.text,
-        'author': _authorController.text,
-        'publisher': _publisherController.text,
-        'isbn': _isbnController.text,
-        'description': _descriptionController.text,
-        'thumbnailUrl': _thumbnailUrl,
-        'userId': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('books')
-          .add(bookData);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('책 정보가 저장되었습니다.')),
-      );
-
-      Navigator.pop(context); // 저장 후 이전 화면으로 돌아가기
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('저장 중 오류가 발생했습니다: $e')),
-      );
-    }
+  // 책 진도 체크 화면으로 이동
+  void _navigateToProgressCheck() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ProgressCheckScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('책 등록하기'),
+        title: Text('책 등록하기'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.send, color: Colors.blue),
-            onPressed: _saveBookToFirestore,
+            icon: Icon(Icons.arrow_forward),
+            onPressed: _navigateToProgressCheck, // 책 진도 체크 화면으로 이동
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView(
+        child: Column(
           children: [
-            // 썸네일 이미지 표시
+            // 책 썸네일 이미지 선택
             GestureDetector(
-              onTap: widget.isEditable ? _pickImage : null, // 변경 가능 여부에 따라 동작
+              onTap: widget.isEditable ? _pickImage : null, // 이미지 변경 가능 시만 선택 가능
               child: Container(
-                height: 200.0,
-                width: double.infinity,
+                height: 150,
+                width: 150,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(10.0),
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey[200],
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10.0),
-                  child: _thumbnailUrl != null
-                      ? (_thumbnailUrl!.startsWith('http') // URL인지 로컬 파일인지 확인
-                          ? Image.network(
-                              _thumbnailUrl!,
-                              fit: BoxFit.contain,
-                            )
-                          : Image.file(
-                              File(_thumbnailUrl!),
-                              fit: BoxFit.contain,
-                            ))
-                      : const Center(
-                          child:
-                              Icon(Icons.image, size: 50.0, color: Colors.grey),
+                child: _thumbnailUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          File(_thumbnailUrl!),
+                          fit: BoxFit.cover,
                         ),
-                ),
+                      )
+                    : Center(child: Icon(Icons.camera_alt, color: Colors.grey)),
               ),
             ),
-            const SizedBox(height: 20.0),
+            SizedBox(height: 20),
+
             // 책 제목 입력
-            _buildTextField('책 제목', _titleController),
-            const SizedBox(height: 10.0),
+            TextField(
+              controller: _titleController,
+              decoration: InputDecoration(
+                labelText: '책 제목',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+
             // 저자 입력
-            _buildTextField('저자', _authorController),
-            const SizedBox(height: 10.0),
+            TextField(
+              controller: _authorController,
+              decoration: InputDecoration(
+                labelText: '저자',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+
             // 출판사 입력
-            _buildTextField('출판사', _publisherController),
-            const SizedBox(height: 10.0),
+            TextField(
+              controller: _publisherController,
+              decoration: InputDecoration(
+                labelText: '출판사',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+
             // ISBN 입력
-            _buildTextField('ISBN', _isbnController),
-            const SizedBox(height: 10.0),
-            // 페이지 수 입력
-            // _buildTextField('페이지 수', widget.pages),
-            // const SizedBox(height: 10.0),
-            // 책 소개 입력 (텍스트 박스 높이 자동 조절)
-            _buildMultiLineTextField('책 소개', _descriptionController),
+            TextField(
+              controller: _isbnController,
+              decoration: InputDecoration(
+                labelText: 'ISBN',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            SizedBox(height: 10),
+
+            // 책 설명 입력
+            TextField(
+              controller: _descriptionController,
+              decoration: InputDecoration(
+                labelText: '책 설명',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildTextField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-      ),
-    );
-  }
-
-  Widget _buildMultiLineTextField(
-      String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      maxLines: null, // 줄바꿈 자동 처리
-      keyboardType: TextInputType.multiline,
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
       ),
     );
   }
