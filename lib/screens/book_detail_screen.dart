@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'edit_screen.dart';
 import 'main_layout.dart';
+import 'package:intl/intl.dart';
 
 class BookDetailScreen extends StatefulWidget {
   final String bookId;
@@ -17,6 +18,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   bool isExpanded = false;
   int localRating = 0;
   String readingState = 'not_started';
+  DateTime? readingStartDate;
+  DateTime? readingDoneDate;
 
   @override
   void initState() {
@@ -32,6 +35,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         setState(() {
           localRating = doc.data()?['rating'] ?? 0;
           readingState = doc.data()?['readingState'] ?? 'not_started';
+          readingStartDate = doc.data()?['readingStartDate']?.toDate();
+          readingDoneDate = doc.data()?['readingDoneDate']?.toDate();
         });
       }
     });
@@ -147,6 +152,164 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         SnackBar(content: Text('삭제 중 오류가 발생했습니다: $e')),
       );
     }
+  }
+
+  // 날짜 선택 함수 추가
+  Future<DateTime?> _selectDate(
+    BuildContext context, {
+    required bool isStartDate,
+    required String status,
+  }) async {
+    DateTime initialDate = DateTime.now();
+    DateTime firstDate;
+    DateTime lastDate;
+
+    if (status == 'reading') {
+      firstDate = DateTime(2000);
+      lastDate = DateTime.now();
+    } else if (status == 'not_started') {
+      firstDate = DateTime.now();
+      lastDate = DateTime.now().add(Duration(days: 365));
+    } else {
+      firstDate = DateTime(2000);
+      lastDate = DateTime.now().add(Duration(days: 365));
+    }
+
+    return await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+  }
+
+  // 상태 변경 다이얼로그 표시 함수 수정
+  void _showReadingStateDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Text('읽기 상태 변경'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: Text('읽기 시작 날짜'),
+                  subtitle: Text(
+                    readingStartDate != null
+                        ? DateFormat('yyyy-MM-dd').format(readingStartDate!)
+                        : '날짜 선택',
+                  ),
+                  onTap: () async {
+                    final date = await _selectDate(
+                      context,
+                      isStartDate: true,
+                      status: readingState,
+                    );
+                    if (date != null) {
+                      setState(() => readingStartDate = date);
+                    }
+                  },
+                ),
+                if (readingState == 'completed')
+                  ListTile(
+                    title: Text('읽기 완료 날짜'),
+                    subtitle: Text(
+                      readingDoneDate != null
+                          ? DateFormat('yyyy-MM-dd').format(readingDoneDate!)
+                          : '날짜 선택',
+                    ),
+                    onTap: () async {
+                      final date = await _selectDate(
+                        context,
+                        isStartDate: false,
+                        status: readingState,
+                      );
+                      if (date != null) {
+                        setState(() => readingDoneDate = date);
+                      }
+                    },
+                  ),
+                Divider(),
+                ListTile(
+                  title: Text('다 읽음'),
+                  onTap: () {
+                    setState(() => readingState = 'completed');
+                  },
+                  trailing: readingState == 'completed'
+                      ? Icon(Icons.check, color: Colors.green)
+                      : null,
+                ),
+                ListTile(
+                  title: Text('읽는 중'),
+                  onTap: () {
+                    setState(() => readingState = 'reading');
+                  },
+                  trailing: readingState == 'reading'
+                      ? Icon(Icons.check, color: Colors.blue)
+                      : null,
+                ),
+                ListTile(
+                  title: Text('안 읽음'),
+                  onTap: () {
+                    setState(() => readingState = 'not_started');
+                  },
+                  trailing: readingState == 'not_started'
+                      ? Icon(Icons.check, color: Colors.grey)
+                      : null,
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                child: Text('취소'),
+                onPressed: () => Navigator.pop(context),
+              ),
+              TextButton(
+                child: Text('저장'),
+                onPressed: () async {
+                  if (readingStartDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('읽기 시작 날짜를 선택해주세요')),
+                    );
+                    return;
+                  }
+                  if (readingState == 'completed' && readingDoneDate == null) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('읽기 완료 날짜를 선택해주세요')),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection('books')
+                        .doc(widget.bookId)
+                        .update({
+                      'readingState': readingState,
+                      'readingStartDate': readingStartDate,
+                      'readingDoneDate': readingDoneDate,
+                    });
+
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('읽기 상태가 변경되었습니다')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('상태 변경 중 오류가 발생했습니다: $e')),
+                    );
+                  }
+                },
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 
   @override
@@ -272,43 +435,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                     bottom: 0,
                                     right: 0,
                                     child: GestureDetector(
-                                      onTap: () {
-                                        showDialog(
-                                          context: context,
-                                          builder: (context) => AlertDialog(
-                                            title: Text('읽기 상태 변경'),
-                                            content: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                ListTile(
-                                                  title: Text('다 읽음'),
-                                                  onTap: () {
-                                                    _updateReadingState(
-                                                        'completed');
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                                ListTile(
-                                                  title: Text('읽는 중'),
-                                                  onTap: () {
-                                                    _updateReadingState(
-                                                        'reading');
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                                ListTile(
-                                                  title: Text('안 읽음'),
-                                                  onTap: () {
-                                                    _updateReadingState(
-                                                        'not_started');
-                                                    Navigator.pop(context);
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
+                                      onTap: _showReadingStateDialog,
                                       child: Container(
                                         padding: EdgeInsets.symmetric(
                                           horizontal: 8,

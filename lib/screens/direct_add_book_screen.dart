@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Image Picker 패키지 추가
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'progress_check_screen.dart';
 
 class DirectAddBookScreen extends StatefulWidget {
   final String? title;
@@ -71,43 +72,22 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
     }
   }
 
-  Future<void> _saveBookToFirestore() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('로그인이 필요합니다.')),
-        );
-        return;
-      }
+  void _navigateToProgressCheck() {
+    final bookData = {
+      'title': _titleController.text,
+      'author': _authorController.text,
+      'publisher': _publisherController.text,
+      'isbn': _isbnController.text,
+      'description': _descriptionController.text,
+      'thumbnailUrl': _thumbnailUrl,
+    };
 
-      final bookData = {
-        'title': _titleController.text,
-        'author': _authorController.text,
-        'publisher': _publisherController.text,
-        'isbn': _isbnController.text,
-        'description': _descriptionController.text,
-        'thumbnailUrl': _thumbnailUrl,
-        'userId': user.uid,
-        'createdAt': FieldValue.serverTimestamp(),
-      };
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('books')
-          .add(bookData);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('서재에 추가되었습니다.')),
-      );
-
-      Navigator.pop(context); // 저장 후 이전 화면으로 돌아가기
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('저장 중 오류가 발생했습니다: $e')),
-      );
-    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProgressCheckScreen(bookData: bookData),
+      ),
+    );
   }
 
   @override
@@ -118,7 +98,7 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.send, color: Colors.blue),
-            onPressed: _saveBookToFirestore,
+            onPressed: _navigateToProgressCheck,
           ),
         ],
       ),

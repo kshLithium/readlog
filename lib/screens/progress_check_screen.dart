@@ -5,7 +5,12 @@ import 'package:intl/intl.dart'; // 날짜 포맷
 import 'main_layout.dart'; // main_layout.dart로 화면 전환
 
 class ProgressCheckScreen extends StatefulWidget {
-  const ProgressCheckScreen({Key? key}) : super(key: key);
+  final Map<String, dynamic> bookData;
+
+  const ProgressCheckScreen({
+    Key? key,
+    required this.bookData,
+  }) : super(key: key);
 
   @override
   _ProgressCheckScreenState createState() => _ProgressCheckScreenState();
@@ -17,15 +22,16 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
   DateTime? _selectedEndDate; // 읽기 완료 날짜 (읽기 완료일 때만 필요)
 
   // 날짜 선택 함수
-  Future<void> _selectDate(BuildContext context, {required bool isStartDate}) async {
+  Future<void> _selectDate(BuildContext context,
+      {required bool isStartDate}) async {
     DateTime initialDate = DateTime.now();
     DateTime firstDate;
     DateTime lastDate;
 
-    if (_selectedStatus == '읽는 중') {
+    if (_selectedStatus == 'reading') {
       firstDate = DateTime(2000);
       lastDate = DateTime.now(); // 오늘 이후 날짜 선택 불가
-    } else if (_selectedStatus == '읽을 예정') {
+    } else if (_selectedStatus == 'not_started') {
       firstDate = DateTime.now(); // 오늘 이전 날짜 선택 불가
       lastDate = DateTime.now().add(Duration(days: 365));
     } else {
@@ -55,31 +61,45 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
   Future<void> _saveBookProgress(String status) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      print("사용자가 로그인하지 않았습니다.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('로그인이 필요합니다.')),
+      );
       return;
     }
 
-    // 저장할 날짜 포맷
-    String formattedStartDate = _selectedStartDate != null ? DateFormat('yyyy-MM-dd').format(_selectedStartDate!) : '';
-    String formattedEndDate = _selectedEndDate != null ? DateFormat('yyyy-MM-dd').format(_selectedEndDate!) : '';
+    // 책 데이터와 진도 체크 데이터를 합침
+    final completeBookData = {
+      ...widget.bookData,
+      'userId': user.uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'readingState': status,
+      'readingStartDate': _selectedStartDate,
+      'readingDoneDate': _selectedEndDate,
+    };
 
     try {
-      await FirebaseFirestore.instance.collection('books_progress').add({
-        'userId': user.uid,
-        'status': status,
-        'startDate': formattedStartDate,
-        'endDate': formattedEndDate,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-      print("Progress saved!");
+      // 모든 데이터를 한 번에 저장
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('books')
+          .add(completeBookData);
+
+      // 저장 성공 메시지 표시
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('서재에 저장되었습니다.')),
+      );
 
       // 저장 후 main_layout.dart 화면으로 이동
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => MainLayout()), // MainLayout 화면으로 이동
+        MaterialPageRoute(builder: (context) => MainLayout()),
+        (route) => false,
       );
     } catch (e) {
-      print("Error saving progress: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('저장 중 오류가 발생했습니다: $e')),
+      );
     }
   }
 
@@ -109,16 +129,25 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedStatus = '읽는 중';
+                      _selectedStatus = 'reading';
                     });
                   },
                   child: Column(
                     children: [
                       Icon(
                         Icons.book,
-                        color: _selectedStatus == '읽는 중' ? Colors.blue : Colors.black,
+                        color: _selectedStatus == 'reading'
+                            ? Colors.blue
+                            : Colors.black,
                       ),
-                      Text('읽는 중'),
+                      Text(
+                        '읽는 중',
+                        style: TextStyle(
+                          color: _selectedStatus == 'reading'
+                              ? Colors.blue
+                              : Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -126,16 +155,25 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedStatus = '읽을 예정';
+                      _selectedStatus = 'not_started';
                     });
                   },
                   child: Column(
                     children: [
                       Icon(
                         Icons.schedule,
-                        color: _selectedStatus == '읽을 예정' ? Colors.blue : Colors.black,
+                        color: _selectedStatus == 'not_started'
+                            ? Colors.blue
+                            : Colors.black,
                       ),
-                      Text('읽을 예정'),
+                      Text(
+                        '읽을 예정',
+                        style: TextStyle(
+                          color: _selectedStatus == 'not_started'
+                              ? Colors.blue
+                              : Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -143,16 +181,25 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      _selectedStatus = '읽기 완료';
+                      _selectedStatus = 'completed';
                     });
                   },
                   child: Column(
                     children: [
                       Icon(
                         Icons.check_circle,
-                        color: _selectedStatus == '읽기 완료' ? Colors.blue : Colors.black,
+                        color: _selectedStatus == 'completed'
+                            ? Colors.blue
+                            : Colors.black,
                       ),
-                      Text('읽기 완료'),
+                      Text(
+                        '읽기 완료',
+                        style: TextStyle(
+                          color: _selectedStatus == 'completed'
+                              ? Colors.blue
+                              : Colors.black,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -168,7 +215,8 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                   GestureDetector(
                     onTap: () => _selectDate(context, isStartDate: true),
                     child: Container(
-                      padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                      padding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
@@ -184,11 +232,12 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                   SizedBox(height: 20),
 
                   // 읽기 완료 날짜 선택 (읽기 완료일 경우만 표시)
-                  if (_selectedStatus == '읽기 완료')
+                  if (_selectedStatus == 'completed')
                     GestureDetector(
                       onTap: () => _selectDate(context, isStartDate: false),
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                        padding:
+                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(8),
@@ -213,7 +262,9 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
                   _saveBookProgress(_selectedStatus!);
                 } else {
                   // 상태와 날짜가 선택되지 않은 경우
-                  print("상태와 날짜를 모두 선택해주세요.");
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('상태와 날짜를 모두 선택해주세요.')),
+                  );
                 }
               },
               child: Text('확인'),

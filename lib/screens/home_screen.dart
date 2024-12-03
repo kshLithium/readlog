@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'search_book_screen.dart';
 import 'direct_add_book_screen.dart';
-// 다른 필요한 화면들 import
+import 'timer_select_book.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -120,7 +120,13 @@ class HomeScreen extends StatelessWidget {
                 width: 300,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 타이머 시작 기능 구현 예정
+                    // 타이머 시작
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TimerSelectBookScreen(),
+                      ),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF597E81),
