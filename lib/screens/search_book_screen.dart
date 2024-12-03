@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'direct_add_book_screen.dart';
+import '../services/api_config.dart';
 
 class BookSearchScreen extends StatefulWidget {
   @override
@@ -44,7 +44,7 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
   // 네이버 도서 검색 API 호출
   Future<void> _searchBooks(String query, {bool isLoadMore = false}) async {
     if (isLoadMore) {
-      _start += 10; // 다음 페이지를 불러오기 위해 시작 위치 증가
+      _start += 10;
     } else {
       setState(() {
         _start = 1;
@@ -58,13 +58,18 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
       _error = null;
     });
 
-    final String clientId = dotenv.env['NAVER_CLIENT_ID'] ?? '';
-    final String clientSecret = dotenv.env['NAVER_CLIENT_SECRET'] ?? '';
-
-    final String apiUrl =
-        "https://openapi.naver.com/v1/search/book.json?query=${Uri.encodeQueryComponent(query)}&display=10&start=$_start&sort=sim";
-
     try {
+      final apiKeys = ApiConfig.getApiKeys();
+      final String clientId = apiKeys['clientId'] ?? '';
+      final String clientSecret = apiKeys['clientSecret'] ?? '';
+
+      if (clientId.isEmpty || clientSecret.isEmpty) {
+        throw Exception('API 키를 불러올 수 없습니다.');
+      }
+
+      final String apiUrl =
+          "https://openapi.naver.com/v1/search/book.json?query=${Uri.encodeQueryComponent(query)}&display=10&start=$_start&sort=sim";
+
       final response = await http.get(
         Uri.parse(apiUrl),
         headers: {
@@ -79,7 +84,7 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
 
         setState(() {
           _books.addAll(newBooks);
-          _hasMore = newBooks.length == 10; // 불러온 데이터가 10개면 더 있을 가능성 있음
+          _hasMore = newBooks.length == 10;
         });
       } else {
         setState(() {
