@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:readlog/screens/login_screen.dart';
 import 'statistics.dart'; // import 추가
+import 'set_goal.dart';
 
 class MyPage extends StatelessWidget {
   @override
@@ -108,6 +109,25 @@ class MyPage extends StatelessWidget {
                       foregroundColor: Colors.black,
                     ),
                     child: Text("통계 보기"),
+                  ),
+                  Divider(),
+                  // "독서 목표" 버튼
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SetGoalScreen(),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: Size(50, 30),
+                      alignment: Alignment.centerLeft,
+                      foregroundColor: Colors.black,
+                    ),
+                    child: Text("독서 목표"),
                   ),
                   Divider(),
                   // 로그아웃 버튼 추가
