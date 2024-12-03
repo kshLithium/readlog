@@ -1,1 +1,28 @@
- 
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 사용자 컬렉션 규칙
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      
+      // 사용자의 책 컬렉션 규칙
+      match /books/{bookId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+      // 사용자의 목표 컬렉션 규칙 추가
+      match /goals/{goalId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // config 컬렉션 규칙
+    match /config/{docId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // deploy test
+  }
+}
