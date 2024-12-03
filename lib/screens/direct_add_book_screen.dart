@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Image Picker 패키지 추가
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart'; // Image Picker 패키지
 import 'progress_check_screen.dart';
 
 class DirectAddBookScreen extends StatefulWidget {
