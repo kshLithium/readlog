@@ -108,7 +108,17 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('책 진도 체크'),
+        backgroundColor: Colors.white, // AppBar 배경색을 흰색으로
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black), // 뒤로가기 버튼 색상을 검정으로
+        titleTextStyle: TextStyle(
+          // 타이틀 텍스트 스타일
+          color: Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
       ),
+      backgroundColor: Colors.white, // Scaffold 배경색을 흰색으로
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

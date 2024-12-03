@@ -147,6 +147,7 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
           },
         ),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

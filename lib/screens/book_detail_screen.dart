@@ -69,7 +69,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
         return '읽는 중';
       case 'not_started':
       default:
-        return '안 읽음';
+        return '읽을 예정';
     }
   }
 
@@ -251,7 +251,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       : null,
                 ),
                 ListTile(
-                  title: Text('안 읽음'),
+                  title: Text('읽을 예정'),
                   onTap: () {
                     setState(() => readingState = 'not_started');
                   },
@@ -542,45 +542,47 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                       ),
                     ),
                     SizedBox(height: 12),
-                    Container(
-                      padding: EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            '나의 평가',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF597E81),
+                    if (readingState != 'not_started')
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              '나의 평가',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF597E81),
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 15),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              5,
-                              (index) => GestureDetector(
-                                onTap: () => updateLocalRating(index + 1),
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 4),
-                                  child: Icon(
-                                    index < localRating
-                                        ? Icons.star
-                                        : Icons.star_border,
-                                    color: Color(0xFF597E81),
-                                    size: 40,
+                            SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: List.generate(
+                                5,
+                                (index) => GestureDetector(
+                                  onTap: () => updateLocalRating(index + 1),
+                                  child: Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 4),
+                                    child: Icon(
+                                      index < localRating
+                                          ? Icons.star
+                                          : Icons.star_border,
+                                      color: Color(0xFF597E81),
+                                      size: 40,
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     SizedBox(height: 130),
                     Container(
                       width: double.infinity,
@@ -603,6 +605,7 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                                 publisher: bookData['publisher'] ?? '',
                                 description: bookData['description'] ?? '',
                                 thumbnailUrl: bookData['thumbnailUrl'],
+                                isbn: bookData['isbn'],
                               ),
                             ),
                           );

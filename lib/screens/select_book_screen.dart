@@ -10,11 +10,17 @@ class SelectBookScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           '책 선택',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: Color(0xFF597E81),
-        iconTheme: IconThemeData(color: Colors.white),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
+      backgroundColor: Colors.white,
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('users')

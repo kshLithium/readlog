@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Image Picker 패키지
 import 'progress_check_screen.dart';
+import 'package:flutter/rendering.dart';
+import 'dart:async';
 
 class DirectAddBookScreen extends StatefulWidget {
   final String? title;
@@ -30,26 +32,58 @@ class DirectAddBookScreen extends StatefulWidget {
 
 class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
   String? _thumbnailUrl;
+  double? _imageAspectRatio; // 이미지 비율을 저장할 변수 추가
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _authorController = TextEditingController();
   final TextEditingController _publisherController = TextEditingController();
   final TextEditingController _isbnController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
+  // 이미지 비율을 계산하는 함수
+  Future<void> _calculateImageAspectRatio(String imagePath) async {
+    if (imagePath.startsWith('http')) {
+      // 네트워크 이미지인 경우
+      final imageProvider = NetworkImage(imagePath);
+      final imageStream = imageProvider.resolve(ImageConfiguration());
+      final completer = Completer<double>();
+
+      imageStream.addListener(ImageStreamListener((info, _) {
+        completer.complete(info.image.width / info.image.height);
+      }));
+
+      final aspectRatio = await completer.future;
+      setState(() {
+        _imageAspectRatio = aspectRatio;
+      });
+    } else {
+      // 로컬 이미지인 경우
+      final file = File(imagePath);
+      final bytes = await file.readAsBytes();
+      final image = await decodeImageFromList(bytes);
+      setState(() {
+        _imageAspectRatio = image.width / image.height;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _thumbnailUrl = widget.thumbnailUrl;
     _titleController.text = widget.title ?? '';
     _authorController.text = widget.author ?? '';
     _publisherController.text = widget.publisher ?? '';
     _isbnController.text = widget.isbn ?? '';
     _descriptionController.text = widget.description ?? '';
+
+    if (widget.thumbnailUrl != null) {
+      _thumbnailUrl = widget.thumbnailUrl;
+      _calculateImageAspectRatio(widget.thumbnailUrl!);
+    }
   }
 
   void _pickImage() async {
     if (!widget.isEditable) {
-      return; // 이미지를 변경할 수 없는 경우 동작하지 않음
+      return;
     }
 
     final ImagePicker picker = ImagePicker();
@@ -57,8 +91,9 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
 
     if (image != null) {
       setState(() {
-        _thumbnailUrl = image.path; // 선택한 이미지의 로컬 파일 경로 저장
+        _thumbnailUrl = image.path;
       });
+      await _calculateImageAspectRatio(image.path);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('이미지를 선택했습니다.')),
@@ -90,9 +125,22 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final containerWidth = MediaQuery.of(context).size.width - 32.0;
+    final containerHeight = _imageAspectRatio != null
+        ? containerWidth / _imageAspectRatio!
+        : containerWidth;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('책 등록하기'),
+        title: const Text(
+          '책 등록하기',
+          style: TextStyle(
+            color: Colors.black,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
         actions: [
           IconButton(
             icon: const Icon(Icons.send, color: Colors.blue),
@@ -100,16 +148,17 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
           ),
         ],
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
             // 썸네일 이미지 표시
             GestureDetector(
-              onTap: widget.isEditable ? _pickImage : null, // 변경 가능 여부에 따라 동작
+              onTap: widget.isEditable ? _pickImage : null,
               child: Container(
-                height: 200.0,
-                width: double.infinity,
+                height: containerHeight, // 계산된 높이 사용
+                width: containerWidth,
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.grey),
                   borderRadius: BorderRadius.circular(10.0),
@@ -117,14 +166,16 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),
                   child: _thumbnailUrl != null
-                      ? (_thumbnailUrl!.startsWith('http') // URL인지 로컬 파일인지 확인
+                      ? (_thumbnailUrl!.startsWith('http')
                           ? Image.network(
                               _thumbnailUrl!,
-                              fit: BoxFit.contain,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
                             )
                           : Image.file(
                               File(_thumbnailUrl!),
-                              fit: BoxFit.contain,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
                             ))
                       : const Center(
                           child:
