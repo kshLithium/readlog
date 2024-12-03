@@ -99,7 +99,7 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
           .add(bookData);
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('책 정보가 저장되었습니다.')),
+        const SnackBar(content: Text('서재에 추가되었습니다.')),
       );
 
       Navigator.pop(context); // 저장 후 이전 화면으로 돌아가기
