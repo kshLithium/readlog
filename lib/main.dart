@@ -3,9 +3,10 @@ import 'package:readlog/screens/splash_screen.dart';
 import 'firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:readlog/screens/login_screen.dart';
 import 'package:readlog/screens/main_layout.dart';
 import 'package:readlog/services/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:readlog/screens/splash_login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 초기화
@@ -14,9 +15,6 @@ void main() async {
     // Firebase 초기화
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
-  // firebase로부터 API 키 초기화
-  await ApiConfig.initialize();
 
   runApp(const MyApp());
 }
@@ -32,20 +30,49 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.teal, // 앱의 기본 색상 설정
       ),
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const SplashScreen();
+      home: FutureBuilder<bool>(
+        // SharedPreferences를 사용하여 첫 실행 여부 확인
+        future: _isFirstTime(),
+        builder: (context, firstTimeSnapshot) {
+          if (firstTimeSnapshot.connectionState == ConnectionState.waiting) {
+            return const SplashScreen(); // 순수 로딩 화면
           }
 
-          if (snapshot.hasData) {
-            return MainLayout(); // HomeScreen() 대신 MainLayout() 사용
+          // 첫 실행인 경우
+          if (firstTimeSnapshot.data == true) {
+            return const SplashLoginScreen(); // 로그인 버튼이 있는 스플래시 화면
           }
 
-          return const LoginScreen(); // 로그인되지 않은 상태
+          // 첫 실행이 아닌 경우 인증 상태 확인
+          return StreamBuilder<User?>(
+            stream: FirebaseAuth.instance.authStateChanges(),
+            builder: (context, authSnapshot) {
+              if (authSnapshot.connectionState == ConnectionState.waiting) {
+                return const SplashScreen(); // 순수 로딩 화면
+              }
+
+              if (authSnapshot.hasData) {
+                // 인증이 완료된 후에 API 키 초기화
+                ApiConfig.initialize();
+                return MainLayout();
+              }
+
+              return const SplashLoginScreen();
+            },
+          );
         },
       ),
     );
+  }
+
+  Future<bool> _isFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    bool isFirstTime = prefs.getBool('first_time') ?? true;
+
+    if (isFirstTime) {
+      await prefs.setBool('first_time', false);
+    }
+
+    return isFirstTime;
   }
 }

@@ -3,6 +3,7 @@ import 'signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'reset_password_screen.dart';
 import 'main_layout.dart';
+import '../services/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -24,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
 
       if (credential.user != null) {
+        await ApiConfig.initialize();
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => MainLayout()),
