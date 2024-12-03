@@ -121,13 +121,13 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
               ),
             ),
 
-            // 날짜 표시 - 좌측 정렬로 수정
+            // 날짜 표시 부분 수정
             Align(
               alignment: Alignment.centerLeft,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Text(
-                  '${_currentDate.year}. ${_currentDate.month}. ${_currentDate.day}. 오후 ${_currentDate.hour}:${_currentDate.minute}',
+                  '${_currentDate.year}. ${_currentDate.month}. ${_currentDate.day}. ${_currentDate.hour < 12 ? "오전" : "오후"} ${_currentDate.hour % 12 == 0 ? 12 : _currentDate.hour % 12}:${_currentDate.minute.toString().padLeft(2, '0')}',
                   style: TextStyle(color: Colors.grey[600]),
                 ),
               ),

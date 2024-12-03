@@ -143,7 +143,7 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
         iconTheme: IconThemeData(color: Colors.black),
         actions: [
           IconButton(
-            icon: const Icon(Icons.send, color: Colors.blue),
+            icon: const Icon(Icons.arrow_forward, color: Colors.blue),
             onPressed: _navigateToProgressCheck,
           ),
         ],
