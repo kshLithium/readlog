@@ -37,28 +37,34 @@ class _MainLayoutState extends State<MainLayout> {
     return Scaffold(
       body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
-        padding: EdgeInsets.symmetric(vertical: 20),
+        padding: EdgeInsets.only(top: 12, bottom: 32),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(30),
             topRight: Radius.circular(30),
           ),
+          border: Border(
+            top: BorderSide(
+              color: Colors.grey.withOpacity(0.2),
+              width: 1.0,
+            ),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black12,
-              blurRadius: 10,
-              offset: Offset(0, -5),
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 6,
+              offset: Offset(0, -2),
             ),
           ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(0, Icons.home, '메인'),
-            _buildNavItem(1, Icons.library_books, '서재관리'),
-            _buildNavItem(2, Icons.psychology, '기억하기'),
-            _buildNavItem(3, Icons.person, '마이페이지'),
+            _buildNavItem(0, Icons.home_outlined, '홈'),
+            _buildNavItem(1, Icons.library_books_outlined, '서재관리'),
+            _buildNavItem(2, Icons.psychology_outlined, '기억하기'),
+            _buildNavItem(3, Icons.person_outline, '마이페이지'),
           ],
         ),
       ),
@@ -73,19 +79,10 @@ class _MainLayoutState extends State<MainLayout> {
           _selectedIndex = index;
         });
       },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? Color(0xFF597E81) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
+      child: Icon(
+        icon,
+        size: 28,
+        color: isSelected ? Color(0xFF597E81) : Colors.grey,
       ),
     );
   }

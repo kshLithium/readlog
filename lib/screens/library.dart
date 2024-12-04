@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'book_detail_screen.dart';
+import 'direct_add_book_screen.dart';
+import 'search_book_screen.dart';
 
 // 서재 관리 화면을 위한 LibraryScreen 위젯
 class LibraryScreen extends StatelessWidget {
@@ -16,8 +18,67 @@ class LibraryScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 fontSize: 24,
                 color: Colors.white)),
-        elevation: 0, // 앱바 그림자 제거
-        backgroundColor: Color(0xFF597E81), // 테마 색상으로 통일
+        actions: [
+          IconButton(
+            icon: Icon(Icons.add, color: Colors.white),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: RoundedRectangleBorder(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(25.0)),
+                ),
+                builder: (BuildContext context) {
+                  return Container(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 4,
+                          margin: EdgeInsets.only(bottom: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[300],
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.search, color: Color(0xFF597E81)),
+                          title: Text('검색해서 등록하기'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => BookSearchScreen()),
+                            );
+                          },
+                        ),
+                        Divider(),
+                        ListTile(
+                          leading: Icon(Icons.edit, color: Color(0xFF597E81)),
+                          title: Text('직접 등록하기'),
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => DirectAddBookScreen()),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          SizedBox(width: 16),
+        ],
+        elevation: 0,
+        backgroundColor: Color(0xFF597E81),
       ),
       body: Container(
         decoration: BoxDecoration(
@@ -28,12 +89,12 @@ class LibraryScreen extends StatelessWidget {
             stops: [0.0, 0.3],
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // 서재 요약 카드 디자인 개선
-              Container(
+        child: Column(
+          children: [
+            // 서재 요약 카드
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
                 padding: EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -90,11 +151,11 @@ class LibraryScreen extends StatelessWidget {
                   },
                 ),
               ),
-
-              SizedBox(height: 24),
-
-              // 그리드뷰 개선
-              Expanded(
+            ),
+            // 그리드뷰를 Expanded로 감싸서 남은 공간을 모두 채우도록 함
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0),
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('users')
@@ -195,8 +256,8 @@ class LibraryScreen extends StatelessWidget {
                   },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
