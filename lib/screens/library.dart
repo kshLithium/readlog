@@ -202,13 +202,3 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 }
-
-class BookLibrary {
-  static List<String> getBooks() {
-    return [
-      '책 제목 1',
-      '책 제목 2',
-      '책 제목 3',
-    ];
-  }
-}

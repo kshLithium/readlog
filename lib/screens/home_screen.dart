@@ -120,7 +120,6 @@ class HomeScreen extends StatelessWidget {
                 width: 300,
                 child: ElevatedButton(
                   onPressed: () {
-                    // 타이머 시작
                     Navigator.push(
                       context,
                       MaterialPageRoute(
