@@ -321,8 +321,6 @@ class StatisticsScreen extends StatelessWidget {
     if (user == null) return Container();
 
     final currentYear = DateTime.now().year;
-    final startOfYear = DateTime(currentYear, 1, 1);
-    final endOfYear = DateTime(currentYear, 12, 31, 23, 59, 59);
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
