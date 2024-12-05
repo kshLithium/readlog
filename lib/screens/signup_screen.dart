@@ -188,116 +188,120 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         title: const Text('회원가입'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '회원님만의\n계정을 만들어주세요.',
-              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20.0),
-            // 이메일 입력
-            const Text('이메일'),
-            const SizedBox(height: 5.0),
-            TextField(
-              controller: _idController,
-              decoration: const InputDecoration(
-                hintText: '이메일을 입력해주세요',
-                border: OutlineInputBorder(),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                '회원님만의\n계정을 만들어주세요.',
+                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
               ),
-            ),
-            const SizedBox(height: 20.0),
-            // 비밀번호 입력
-            const Text('비밀번호'),
-            const SizedBox(height: 5.0),
-            TextField(
-              controller: _passwordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: '비밀번호를 입력해주세요',
-                border: OutlineInputBorder(),
-                suffixIcon: const Icon(Icons.visibility_off),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            // 비밀번호 조건 표시
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 8.0,
-              children: _passwordConditions.entries.map((entry) {
-                return _buildCondition(entry.key, entry.value);
-              }).toList(),
-            ),
-            const SizedBox(height: 20.0),
-            // 비밀번호 확인 필드와 일치 여부 표시
-            const Text('비밀번호 확인'),
-            const SizedBox(height: 5.0),
-            TextField(
-              controller: _confirmPasswordController,
-              obscureText: true,
-              decoration: const InputDecoration(
-                hintText: '비밀번호를 입력해주세요',
-                border: OutlineInputBorder(),
-                suffixIcon: Icon(Icons.visibility_off),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            if (_confirmPasswordController
-                .text.isNotEmpty) // 비밀번호 확인 필드가 비어있지 않을 때만 표시
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _isPasswordMatch == true
-                      ? Colors.green.withOpacity(0.1)
-                      : Colors.red.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
+              const SizedBox(height: 20.0),
+              // 이메일 입력
+              const Text('이메일'),
+              const SizedBox(height: 5.0),
+              TextField(
+                controller: _idController,
+                decoration: const InputDecoration(
+                  hintText: '이메일을 입력해주세요',
+                  border: OutlineInputBorder(),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isPasswordMatch == true
-                          ? Icons.check_circle
-                          : Icons.cancel,
-                      size: 14.0,
-                      color:
-                          _isPasswordMatch == true ? Colors.green : Colors.red,
-                    ),
-                    SizedBox(width: 4),
-                    Text(
-                      _isPasswordMatch == true ? '비밀번호 일치' : '비밀번호 불일치',
-                      style: TextStyle(
-                        fontSize: 12,
+              ),
+              const SizedBox(height: 20.0),
+              // 비밀번호 입력
+              const Text('비밀번호'),
+              const SizedBox(height: 5.0),
+              TextField(
+                controller: _passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: '비밀번호를 입력해주세요',
+                  border: OutlineInputBorder(),
+                  suffixIcon: const Icon(Icons.visibility_off),
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              // 비밀번호 조건 표시
+              Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: _passwordConditions.entries.map((entry) {
+                  return _buildCondition(entry.key, entry.value);
+                }).toList(),
+              ),
+              const SizedBox(height: 20.0),
+              // 비밀번호 확인 필드와 일치 여부 표시
+              const Text('비밀번호 확인'),
+              const SizedBox(height: 5.0),
+              TextField(
+                controller: _confirmPasswordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: '비밀번호를 입력해주세요',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.visibility_off),
+                ),
+              ),
+              const SizedBox(height: 10.0),
+              if (_confirmPasswordController
+                  .text.isNotEmpty) // 비밀번호 확인 필드가 비어있지 않을 때만 표시
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _isPasswordMatch == true
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _isPasswordMatch == true
+                            ? Icons.check_circle
+                            : Icons.cancel,
+                        size: 14.0,
                         color: _isPasswordMatch == true
                             ? Colors.green
                             : Colors.red,
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 4),
+                      Text(
+                        _isPasswordMatch == true ? '비밀번호 일치' : '비밀번호 불일치',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: _isPasswordMatch == true
+                              ? Colors.green
+                              : Colors.red,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 30.0),
+              // 가입하기 버튼
+              ElevatedButton(
+                onPressed: _isPasswordValid && _isPasswordMatch == true
+                    ? _signUp
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    '가입하기',
+                    style: TextStyle(fontSize: 16.0, color: Colors.white),
+                  ),
                 ),
               ),
-            const SizedBox(height: 30.0),
-            // 가입하기 버튼
-            ElevatedButton(
-              onPressed:
-                  _isPasswordValid && _isPasswordMatch == true ? _signUp : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: const EdgeInsets.symmetric(vertical: 15.0),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              child: const Center(
-                child: Text(
-                  '가입하기',
-                  style: TextStyle(fontSize: 16.0, color: Colors.white),
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

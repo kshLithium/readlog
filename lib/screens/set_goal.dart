@@ -87,75 +87,77 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
         iconTheme: IconThemeData(color: Colors.black),
       ),
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.all(30.0),
-        child: Column(
-          children: [
-            SizedBox(height: 70),
-            Text(
-              '연간 목표를 설정하세요',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _yearlyGoalController,
-              decoration: InputDecoration(
-                labelText: '연간 독서 목표 (권)',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.black87),
-                counterText: '',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(3),
-              ],
-            ),
-            SizedBox(height: 150),
-            Text(
-              '월간 목표를 설정하세요',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 10),
-            TextField(
-              controller: _monthlyGoalController,
-              decoration: InputDecoration(
-                labelText: '월간 독서 목표 (권)',
-                border: OutlineInputBorder(),
-                labelStyle: TextStyle(color: Colors.black87),
-                counterText: '',
-              ),
-              keyboardType: TextInputType.number,
-              inputFormatters: [
-                FilteringTextInputFormatter.digitsOnly,
-                LengthLimitingTextInputFormatter(3),
-              ],
-            ),
-            SizedBox(height: 150),
-            ElevatedButton(
-              onPressed: _saveGoals,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal[200],
-                foregroundColor: Colors.white,
-                minimumSize: Size(200, 55),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(30.0),
+          child: Column(
+            children: [
+              SizedBox(height: 70),
+              Text(
+                '연간 목표를 설정하세요',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
               ),
-              child: Text(
-                '목표 저장',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              SizedBox(height: 10),
+              TextField(
+                controller: _yearlyGoalController,
+                decoration: InputDecoration(
+                  labelText: '연간 독서 목표 (권)',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.black87),
+                  counterText: '',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
               ),
-            ),
-          ],
+              SizedBox(height: 150),
+              Text(
+                '월간 목표를 설정하세요',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _monthlyGoalController,
+                decoration: InputDecoration(
+                  labelText: '월간 독서 목표 (권)',
+                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: Colors.black87),
+                  counterText: '',
+                ),
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                  LengthLimitingTextInputFormatter(3),
+                ],
+              ),
+              SizedBox(height: 150),
+              ElevatedButton(
+                onPressed: _saveGoals,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal[200],
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(200, 55),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  '목표 저장',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

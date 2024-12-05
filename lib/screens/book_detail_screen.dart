@@ -179,6 +179,17 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     } else if (status == 'not_started') {
       firstDate = DateTime.now();
       lastDate = DateTime.now().add(Duration(days: 365));
+    } else if (status == 'completed') {
+      firstDate = DateTime(2000);
+      lastDate = DateTime.now();
+
+      if (!isStartDate && readingStartDate != null) {
+        firstDate = readingStartDate!;
+        initialDate = readingDoneDate ?? readingStartDate!;
+        if (initialDate.isAfter(lastDate)) {
+          initialDate = lastDate;
+        }
+      }
     } else {
       firstDate = DateTime(2000);
       lastDate = DateTime.now().add(Duration(days: 365));
@@ -189,6 +200,10 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      locale: const Locale('ko', 'KR'),
+      selectableDayPredicate: status == 'completed'
+          ? (DateTime date) => !date.isAfter(DateTime.now())
+          : null,
     );
   }
 

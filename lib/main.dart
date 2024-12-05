@@ -11,7 +11,6 @@ import 'package:readlog/screens/splash_login_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // 초기화
-  // await dotenv.load(); // .env 파일 더 이상 사용하지 않음
   await Firebase.initializeApp(
     // Firebase 초기화
     options: DefaultFirebaseOptions.currentPlatform,
