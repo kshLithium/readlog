@@ -4,22 +4,26 @@ import 'package:readlog/screens/login_screen.dart';
 import 'statistics.dart'; // import 추가
 import 'set_goal.dart';
 import 'timer_select_book.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // Firebase Auth에서 현재 사용자 가져오기
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       body: Stack(
         children: [
           Column(
             children: [
               Container(
-                height: 200, // 높이 증가
+                height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.teal[200],
                   borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(50), // 곡률 감소
+                    bottom: Radius.circular(50),
                   ),
                 ),
               ),
@@ -27,41 +31,62 @@ class MyPage extends StatelessWidget {
             ],
           ),
           Positioned(
-            top: 60, // 위치 조정
+            top: 60,
             left: 30,
             child: Row(
               children: [
                 Container(
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3), // 테두리 추가
+                    border: Border.all(color: Colors.white, width: 3),
                   ),
                   child: CircleAvatar(
-                    radius: 45, // 크기 증가
+                    radius: 45,
                     backgroundColor: Colors.purple[100],
                     child: Icon(Icons.person, size: 45, color: Colors.white),
                   ),
                 ),
                 SizedBox(width: 20),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '닉네임1234',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Text(
-                      '독서와 함께하는 즐거운 하루', // 상태 메시지 추가
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.white.withOpacity(0.8),
-                      ),
-                    ),
-                  ],
+                // StreamBuilder를 사용하여 사용자 정보 실시간 업데이트
+                StreamBuilder<DocumentSnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('users')
+                      .doc(user?.uid)
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('오류가 발생했습니다');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    final userData =
+                        snapshot.data?.data() as Map<String, dynamic>?;
+                    final nickname = userData?['nickname'] ?? '사용자';
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          nickname,
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          '독서와 함께하는 즐거운 하루',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.white.withOpacity(0.8),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
