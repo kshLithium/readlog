@@ -187,7 +187,7 @@ class StatisticsScreen extends StatelessWidget {
         .collection('users')
         .doc(user.uid)
         .collection('books')
-        .where('readingState', isEqualTo: 'completed') // completed 상태인 책만 가져오기
+        .where('readingState', isEqualTo: 'completed')
         .snapshots()
         .map((snapshot) {
       Map<int, int> monthlyCount = {};
@@ -201,8 +201,8 @@ class StatisticsScreen extends StatelessWidget {
       for (var doc in snapshot.docs) {
         final data = doc.data();
         final doneDate = data['readingDoneDate'];
-        if (doneDate != null) {
-          final date = (doneDate as Timestamp).toDate();
+        if (doneDate != null && doneDate is Timestamp) {
+          final date = doneDate.toDate();
           // 현재 연도의 데이터만 필터링
           if (date.year == currentYear) {
             monthlyCount[date.month] = (monthlyCount[date.month] ?? 0) + 1;
@@ -438,9 +438,13 @@ class StatisticsScreen extends StatelessWidget {
       final now = DateTime.now();
 
       if (readingState == 'completed') {
-        final doneDate = (data['readingDoneDate'] as Timestamp).toDate();
-        final duration = doneDate.difference(startDate).inDays + 1;
-        return '${duration}일';
+        final doneDate = data['readingDoneDate'];
+        if (doneDate != null && doneDate is Timestamp) {
+          final doneDateValue = doneDate.toDate();
+          final duration = doneDateValue.difference(startDate).inDays + 1;
+          return '${duration}일';
+        }
+        return '완료';
       } else {
         final duration = now.difference(startDate).inDays + 1;
         return '~${duration}일';
