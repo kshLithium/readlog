@@ -67,23 +67,43 @@ class _ProgressCheckScreenState extends State<ProgressCheckScreen> {
       return;
     }
 
-    // 책 데이터와 진도 체크 데이터를 합침
-    final completeBookData = {
-      ...widget.bookData,
-      'userId': user.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-      'readingState': status,
-      'readingStartDate': _selectedStartDate,
-      'readingDoneDate': _selectedEndDate,
-    };
-
     try {
-      // 모든 데이터를 한 번에 저장
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .collection('books')
-          .add(completeBookData);
+      // 사용자 문서 참조
+      final userDocRef =
+          FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+      // 현재 저장된 책 수 확인
+      final userDoc = await userDocRef.get();
+      final int currentBookCount = userDoc.data()?['bookCount'] ?? 0;
+
+      // 책 수가 1000권 이상이면 저장 중단
+      if (currentBookCount >= 1000) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('최대 1,000권까지만 저장할 수 있습니다.')),
+        );
+        return;
+      }
+
+      // 트랜잭션으로 책 저장과 카운트 업데이트를 동시에 처리
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        // 책 데이터와 진도 체크 데이터를 합침
+        final completeBookData = {
+          ...widget.bookData,
+          'userId': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+          'readingState': status,
+          'readingStartDate': _selectedStartDate,
+          'readingDoneDate': _selectedEndDate,
+        };
+
+        // 새 책 문서 생성
+        final newBookRef = userDocRef.collection('books').doc();
+        transaction.set(newBookRef, completeBookData);
+
+        // bookCount 필드 업데이트
+        transaction.set(userDocRef, {'bookCount': currentBookCount + 1},
+            SetOptions(merge: true));
+      });
 
       // 저장 성공 메시지 표시
       ScaffoldMessenger.of(context).showSnackBar(

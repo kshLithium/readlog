@@ -125,13 +125,22 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       );
 
       if (confirmDelete == true) {
-        // 책 삭제
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .collection('books')
-            .doc(widget.bookId)
-            .delete();
+        // 트랜잭션으로 책 삭제와 카운트 감소를 동시에 처리
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final userDocRef =
+              FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+          // 현재 bookCount 가져오기
+          final userDoc = await transaction.get(userDocRef);
+          final currentCount = userDoc.data()?['bookCount'] ?? 1;
+
+          // 책 삭제
+          transaction.delete(userDocRef.collection('books').doc(widget.bookId));
+
+          // bookCount 감소
+          transaction.set(userDocRef, {'bookCount': currentCount - 1},
+              SetOptions(merge: true));
+        });
 
         // 삭제 완료 메시지
         ScaffoldMessenger.of(context).showSnackBar(
