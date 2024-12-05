@@ -5,241 +5,470 @@ class StatisticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            // 상단 영역 배경 및 타이틀
-            Container(
-              color: Colors.teal[300],
-              padding: EdgeInsets.symmetric(vertical: 40.0, horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '통계',
-                    style: TextStyle(
-                      fontSize: 34,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          // 상단 헤더
+          Container(
+            color: Color(0xFF597E81),
+            padding: EdgeInsets.fromLTRB(16, 70, 16, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '통계',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
                   ),
-                  Icon(
-                    Icons.bar_chart,
-                    color: Colors.black,
-                    size: 45,
-                  ),
-                ],
-              ),
+                ),
+                Icon(Icons.bar_chart, color: Colors.white, size: 45),
+              ],
             ),
-            // 통계 아이콘 목록: 수평 스크롤 가능
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+          ),
+          // 메인 콘텐츠
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF597E81), Colors.white],
+                  stops: [0.0, 0.3],
+                ),
+              ),
               child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
+                child: Column(
                   children: [
-                    StatCard(title: '1년 동안 n권', icon: Icons.book),
-                    SizedBox(width: 8),
-                    StatCard(title: '월 평균 n권', icon: Icons.calendar_today),
-                    SizedBox(width: 8),
-                    StatCard(title: '가장 많이 읽은 달', icon: Icons.bar_chart),
+                    // 연간 독서 현황 카드
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            children: [
+                              Text(
+                                '2024년 독서 현황',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF597E81),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  _buildCircularProgress(
+                                    '읽은 책',
+                                    '12',
+                                    '권',
+                                    0.6,
+                                    Colors.blue,
+                                  ),
+                                  _buildCircularProgress(
+                                    '목표 달성',
+                                    '60',
+                                    '%',
+                                    0.6,
+                                    Colors.green,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 월별 독서량 그래프
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '월별 독서량',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF597E81),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Container(
+                                height: 200,
+                                child: _buildMonthlyReadingChart(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 별점 분포
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '별점 분포',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF597E81),
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              _buildRatingDistribution(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    // 월별 독서 기록
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '월별 독서 기록',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF597E81),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              _buildMonthlyBookList(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20), // 하단 여백
                   ],
                 ),
               ),
             ),
-            // 나머지 통계 화면 내용
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 20),
-                  RatingCard(), // 별점 평균 카드
-                  SizedBox(height: 20),
-                  MonthHeader(title: '1월'), // 월 헤더
-                  CustomBookStatTile(
-                      title: '책 제목', days: '3일', rating: 5), // 책 정보 카드
-                  CustomBookStatTile(
-                      title: '책 제목', days: '15일', rating: 4), // 또 다른 책 정보 카드
-                ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCircularProgress(
+    String label,
+    String value,
+    String unit,
+    double progress,
+    Color color,
+  ) {
+    return Column(
+      children: [
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 100,
+              height: 100,
+              child: CircularProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey[200],
+                valueColor: AlwaysStoppedAnimation<Color>(color),
+                strokeWidth: 10,
               ),
             ),
+            Column(
+              children: [
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                ),
+                Text(
+                  unit,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-// StatCard 클래스: 통계 아이콘 카드 위젯
-class StatCard extends StatelessWidget {
-  final String title; // 카드 제목
-  final IconData icon; // 카드에 표시할 아이콘
-
-  StatCard({required this.title, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Icon(icon, size: 30), // 아이콘
-            SizedBox(height: 10),
-            Text(title, style: TextStyle(fontSize: 14)), // 제목 텍스트
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// RatingCard 클래스: 별점 평균을 표시하는 카드 위젯
-class RatingCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // 별점 카드 본체
-        Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey),
-          ),
-          margin: EdgeInsets.only(top: 12),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(vertical: 30.0, horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(5,
-                  (index) => Icon(Icons.star, color: Colors.amber, size: 36)),
-            ),
-          ),
-        ),
-        // "별점 평균" 텍스트 위치 조정 (카드 상단에 걸쳐 위치)
-        Positioned(
-          left: 16,
-          top: 0,
-          child: Container(
-            color: Color(0xFFF7F0F8), // 화면 배경과 동일한 색상으로 설정
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: Text(
-              '별점 평균',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+        SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[800],
           ),
         ),
       ],
     );
   }
-}
 
-// CustomBookStatTile 클래스: 책 제목, 별점, 날짜 등의 정보를 표시하는 리스트 아이템 위젯
-class CustomBookStatTile extends StatelessWidget {
-  final String title; // 책 제목
-  final String days; // 읽은 날짜 정보
-  final int rating; // 별점
+  Widget _buildMonthlyReadingChart() {
+    // 여기에 차트 라이브러리를 사용하여 월별 독서량 차트를 구현합니다
+    // fl_chart 또는 charts_flutter 등을 사용할 수 있습니다
+    return Container(
+      // 임시로 더미 데이터 표시
+      color: Colors.grey[100],
+      child: Center(
+        child: Text('월별 독서량 차트가 들어갈 자리입니다'),
+      ),
+    );
+  }
 
-  CustomBookStatTile(
-      {required this.title, required this.days, required this.rating});
+  Widget _buildRatingDistribution() {
+    return Column(
+      children: [
+        _buildRatingBar('5점', 0.8),
+        SizedBox(height: 8),
+        _buildRatingBar('4점', 0.6),
+        SizedBox(height: 8),
+        _buildRatingBar('3점', 0.3),
+        SizedBox(height: 8),
+        _buildRatingBar('2점', 0.2),
+        SizedBox(height: 8),
+        _buildRatingBar('1점', 0.1),
+      ],
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildRatingBar(String label, double value) {
+    return Row(
+      children: [
+        SizedBox(
+          width: 40,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: value,
+              backgroundColor: Colors.grey[200],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.amber),
+              minHeight: 8,
+            ),
+          ),
+        ),
+        SizedBox(width: 8),
+        Text(
+          '${(value * 100).toInt()}%',
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMonthlyBookList() {
+    return Column(
+      children: [
+        _buildMonthSection('3월', [
+          _buildBookItem(
+            '클린 코드',
+            '로버트 C. 마틴',
+            4,
+            '2024.03.15',
+            'https://example.com/book1.jpg',
+          ),
+          _buildBookItem(
+            '객체지향의 사실과 오해',
+            '조영호',
+            5,
+            '2024.03.05',
+            'https://example.com/book2.jpg',
+          ),
+        ]),
+        _buildMonthSection('2월', [
+          _buildBookItem(
+            '함께 자라기',
+            '김창준',
+            5,
+            '2024.02.20',
+            'https://example.com/book3.jpg',
+          ),
+        ]),
+        _buildMonthSection('1월', [
+          _buildBookItem(
+            '누구나 자료 구조와 알고리즘',
+            '제이 웬그로우',
+            4,
+            '2024.01.10',
+            'https://example.com/book4.jpg',
+          ),
+          _buildBookItem(
+            '이펙티브 자바',
+            '조슈아 블로크',
+            5,
+            '2024.01.03',
+            'https://example.com/book5.jpg',
+          ),
+        ]),
+      ],
+    );
+  }
+
+  Widget _buildMonthSection(String month, List<Widget> books) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Row(
+            children: [
+              Text(
+                month,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF597E81),
+                ),
+              ),
+              SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  height: 1,
+                  color: Colors.grey[300],
+                ),
+              ),
+            ],
+          ),
+        ),
+        ...books,
+      ],
+    );
+  }
+
+  Widget _buildBookItem(
+    String title,
+    String author,
+    int rating,
+    String date,
+    String imageUrl,
+  ) {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
-      child: Stack(
-        children: [
-          // 카드 본체
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 책 커버 이미지
+            Container(
+              width: 60,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.book, color: Colors.grey[400]),
             ),
-            elevation: 2,
-            margin: EdgeInsets.zero,
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-              child: Row(
+            SizedBox(width: 12),
+            // 책 정보
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 왼쪽 이미지 자리 (책 커버 이미지로 대체 가능)
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Center(
-                      child:
-                          Icon(Icons.photo, size: 30, color: Colors.grey[600]),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[800],
                     ),
                   ),
-                  SizedBox(width: 12),
-                  // 중앙 텍스트 정보
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          children: List.generate(
-                              rating,
-                              (index) => Icon(Icons.star,
-                                  color: Colors.amber, size: 18)),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '기억하고 싶은 구절이 여기에 표시됩니다.',
-                          style:
-                              TextStyle(fontSize: 14, color: Colors.grey[700]),
-                        ),
-                      ],
+                  SizedBox(height: 4),
+                  Text(
+                    author,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Row(
+                    children: List.generate(
+                      5,
+                      (index) => Icon(
+                        index < rating ? Icons.star : Icons.star_border,
+                        size: 16,
+                        color: Colors.amber,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          ),
-          // 오른쪽 상단에 작은 폰트로 날짜 표시
-          Positioned(
-            right: 12,
-            top: 8,
-            child: Text(
-              days,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            // 날짜
+            Text(
+              date,
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[500],
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// MonthHeader 클래스: "월"과 함께 구분선을 표시하는 헤더 위젯
-class MonthHeader extends StatelessWidget {
-  final String title; // 헤더의 제목 (예: "1월")
-
-  MonthHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Text(
-            title,
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(width: 8),
-          Expanded(child: Divider(thickness: 1, color: Colors.grey)), // 구분선
-        ],
+          ],
+        ),
       ),
     );
   }
