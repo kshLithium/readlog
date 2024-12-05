@@ -144,9 +144,6 @@ class HomeScreen extends StatelessWidget {
                           ? now.difference(startDate.toDate()).inDays + 1
                           : 1;
 
-                      final screenHeight = MediaQuery.of(context).size.height;
-                      final imageHeight = screenHeight * 0.35;
-
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
