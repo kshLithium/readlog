@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:readlog/screens/login_screen.dart';
 import 'statistics.dart'; // import 추가
 import 'set_goal.dart';
+import 'timer_select_book.dart';
 
 class MyPage extends StatelessWidget {
   @override
@@ -10,129 +11,122 @@ class MyPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 배경의 원 부분
           Column(
             children: [
               Container(
-                // 배경의 원 높이와 너비 설정
-                height: 180,
+                height: 200, // 높이 증가
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  // 배경 색상 설정
                   color: Colors.teal[200],
-                  // 아래쪽 모서리를 둥글게 만들기
                   borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(100),
+                    bottom: Radius.circular(50), // 곡률 감소
                   ),
                 ),
               ),
-              // 배경과 나머지 내용 사이의 여백 공간 확보
-              SizedBox(height: 80),
+              SizedBox(height: 100),
             ],
           ),
-          // 프로필 사진과 닉네임 섹션
           Positioned(
-            // 프로필 사진과 닉네임을 배경 위에 배치할 위치 설정
-            top: 40, // 위쪽 여백
-            left: 30, // 왼쪽 여백
+            top: 60, // 위치 조정
+            left: 30,
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: 40, // 프로필 사진의 반지름 크기 설정
-                  backgroundColor: Colors.purple[100], // 아바타 배경색 설정
-                  child: Icon(Icons.person,
-                      size: 40, color: Colors.white), // 아이콘 설정
-                ),
-                SizedBox(width: 20), // 아바타와 닉네임 간의 간격 설정
-                Text(
-                  '닉네임1234', // 닉네임 텍스트
-                  style: TextStyle(
-                    fontSize: 24, // 폰트 크기 설정
-                    fontWeight: FontWeight.bold, // 폰트 두께 설정
-                    color: Colors.white, // 텍스트 색상 설정
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3), // 테두리 추가
                   ),
+                  child: CircleAvatar(
+                    radius: 45, // 크기 증가
+                    backgroundColor: Colors.purple[100],
+                    child: Icon(Icons.person, size: 45, color: Colors.white),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '닉네임1234',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      '독서와 함께하는 즐거운 하루', // 상태 메시지 추가
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.8),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          // 계정 관리와 통계 보기 버튼이 들어있는 박스
           Positioned(
-            top: 140, // 박스를 원과 겹치도록 위쪽 위치 설정
-            left: 20, // 좌측 여백 설정
-            right: 20, // 우측 여백 설정
+            top: 160,
+            left: 20,
+            right: 20,
             child: Container(
-              padding: EdgeInsets.all(20), // 내부 여백 설정
+              padding: EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colors.white, // 박스 배경색 설정
-                borderRadius: BorderRadius.circular(15), // 박스 모서리를 둥글게
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
                 boxShadow: [
-                  // 박스에 그림자 효과 추가
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.2), // 그림자 색상과 투명도 설정
-                    spreadRadius: 2, // 그림자 확산 정도
-                    blurRadius: 5, // 그림자 흐림 정도
-                    offset: Offset(0, 3), // 그림자의 위치 설정 (x축, y축)
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 2,
+                    blurRadius: 8,
+                    offset: Offset(0, 3),
                   ),
                 ],
               ),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start, // 텍스트 왼쪽 정렬
                 children: [
-                  // "계정 관리" 버튼
-                  TextButton(
-                    onPressed: () {
-                      // 계정 관리 페이지로 이동하는 로직 추가
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero, // 버튼 내부 여백 제거
-                      minimumSize: Size(50, 30), // 버튼 최소 크기 설정
-                      alignment: Alignment.centerLeft, // 텍스트 왼쪽 정렬
-                      foregroundColor: Colors.black, // 버튼 텍스트 색상 설정
+                  _buildMenuItem(
+                    icon: Icons.bar_chart,
+                    title: "통계 보기",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => StatisticsScreen()),
                     ),
-                    child: Text("계정 관리"), // 버튼 텍스트
                   ),
-                  Divider(), // 계정 관리와 통계 보기 버튼 사이 구분선
-                  // "통계 보기" 버튼
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StatisticsScreen(),
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size(50, 30),
-                      alignment: Alignment.centerLeft,
-                      foregroundColor: Colors.black,
+                  _buildDivider(),
+                  _buildMenuItem(
+                    icon: Icons.flag,
+                    title: "독서 목표",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => SetGoalScreen()),
                     ),
-                    child: Text("통계 보기"),
                   ),
-                  Divider(),
-                  // "독서 목표" 버튼
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SetGoalScreen(),
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size(50, 30),
-                      alignment: Alignment.centerLeft,
-                      foregroundColor: Colors.black,
+                  _buildDivider(),
+                  _buildMenuItem(
+                    icon: Icons.timer,
+                    title: "타이머 시작",
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => TimerSelectBookScreen()),
                     ),
-                    child: Text("독서 목표"),
                   ),
-                  Divider(),
-                  // 로그아웃 버튼 추가
-                  TextButton(
-                    onPressed: () async {
+                  _buildDivider(),
+                  _buildMenuItem(
+                    icon: Icons.manage_accounts,
+                    title: "계정 관리",
+                    onTap: () {
+                      // 계정 관리 페이지로 이동하는 로직
+                    },
+                  ),
+                  _buildDivider(),
+                  _buildMenuItem(
+                    icon: Icons.logout,
+                    title: "로그아웃",
+                    onTap: () async {
                       await FirebaseAuth.instance.signOut();
                       Navigator.pushAndRemoveUntil(
                         context,
@@ -140,13 +134,6 @@ class MyPage extends StatelessWidget {
                         (route) => false,
                       );
                     },
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: Size(50, 30),
-                      alignment: Alignment.centerLeft,
-                      foregroundColor: Colors.black,
-                    ),
-                    child: Text("로그아웃"),
                   ),
                 ],
               ),
@@ -154,6 +141,42 @@ class MyPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, size: 24, color: Colors.teal[300]),
+            SizedBox(width: 15),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            Spacer(),
+            Icon(Icons.chevron_right, color: Colors.grey[400]),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      color: Colors.grey[200],
+      thickness: 1,
+      height: 1,
     );
   }
 }
