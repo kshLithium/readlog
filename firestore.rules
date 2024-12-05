@@ -23,6 +23,24 @@ service cloud.firestore {
       allow write: if false;
     }
 
-    // deploy test
+    // 리뷰 컬렉션 규칙
+    match /reviews/{reviewId} {
+      // 모든 인증된 사용자가 읽기 가능
+      allow read: if request.auth != null;
+      
+      // 생성 규칙: 필수 필드 확인 및 userId 검증
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.keys().hasAll(['userId', 'userName', 'bookId', 'bookTitle', 'reviewText', 'createdAt', 'thumbnailUrl', 'author']);
+      
+      // 수정 규칙: 자신의 리뷰만 수정 가능
+      allow update: if request.auth != null 
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.userId == request.auth.uid;
+      
+      // 삭제 규칙: 자신의 리뷰만 삭제 가능
+      allow delete: if request.auth != null 
+        && resource.data.userId == request.auth.uid;
+    }
   }
 }

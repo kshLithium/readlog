@@ -13,6 +13,7 @@ class MyPage extends StatelessWidget {
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Stack(
         children: [
           Column(
@@ -21,7 +22,7 @@ class MyPage extends StatelessWidget {
                 height: 200,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.teal[200],
+                  color: Color(0xFF597E81),
                   borderRadius: BorderRadius.vertical(
                     bottom: Radius.circular(50),
                   ),
