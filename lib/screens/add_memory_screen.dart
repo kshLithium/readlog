@@ -146,6 +146,20 @@ class _AddMemoryScreenState extends State<AddMemoryScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                   maxLines: null,
+                  maxLength: 500,
+                  buildCounter: (BuildContext context,
+                      {required int currentLength,
+                      required bool isFocused,
+                      required int? maxLength}) {
+                    return Text(
+                      '$currentLength/500자',
+                      style: TextStyle(
+                        color: currentLength >= 500
+                            ? Colors.red
+                            : Colors.grey[600],
+                      ),
+                    );
+                  },
                   decoration: InputDecoration(
                     border: InputBorder.none,
                     hintText: '기억하고 싶은 문장을 작성해보세요',
