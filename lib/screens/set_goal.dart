@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/services.dart';
 
 class SetGoalScreen extends StatefulWidget {
   @override
@@ -73,9 +74,19 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('독서 목표 설정'),
-        backgroundColor: Colors.teal[200],
+        title: Text(
+          '독서 목표 설정',
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: IconThemeData(color: Colors.black),
       ),
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.all(30.0),
         child: Column(
@@ -83,7 +94,11 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
             SizedBox(height: 70),
             Text(
               '연간 목표를 설정하세요',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             SizedBox(height: 10),
             TextField(
@@ -91,13 +106,23 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
               decoration: InputDecoration(
                 labelText: '연간 독서 목표 (권)',
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.black87),
+                counterText: '',
               ),
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(3),
+              ],
             ),
             SizedBox(height: 150),
             Text(
               '월간 목표를 설정하세요',
-              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             SizedBox(height: 10),
             TextField(
@@ -105,8 +130,14 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
               decoration: InputDecoration(
                 labelText: '월간 독서 목표 (권)',
                 border: OutlineInputBorder(),
+                labelStyle: TextStyle(color: Colors.black87),
+                counterText: '',
               ),
               keyboardType: TextInputType.number,
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(3),
+              ],
             ),
             SizedBox(height: 150),
             ElevatedButton(
@@ -115,10 +146,13 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
                 backgroundColor: Colors.teal[200],
                 foregroundColor: Colors.white,
                 minimumSize: Size(200, 55),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
               child: Text(
                 '목표 저장',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
           ],
