@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'library.dart';
 import 'memory_screen.dart';
+import 'review_screen.dart';
 import 'mypage.dart';
 
 class MainLayout extends StatefulWidget {
@@ -29,6 +30,7 @@ class _MainLayoutState extends State<MainLayout> {
     HomeScreen(),
     LibraryScreen(),
     MemoryScreen(),
+    ReviewScreen(),
     MyPage(),
   ];
 
@@ -64,7 +66,8 @@ class _MainLayoutState extends State<MainLayout> {
             _buildNavItem(0, Icons.home_outlined, '홈'),
             _buildNavItem(1, Icons.library_books_outlined, '서재관리'),
             _buildNavItem(2, Icons.psychology_outlined, '기억하기'),
-            _buildNavItem(3, Icons.person_outline, '마이페이지'),
+            _buildNavItem(3, Icons.rate_review_outlined, '리뷰'),
+            _buildNavItem(4, Icons.person_outline, '마이페이지'),
           ],
         ),
       ),
