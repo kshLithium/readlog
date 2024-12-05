@@ -163,25 +163,27 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     }
   }
 
-  // 날짜 선택 함수 추가
+  // 날짜 선택 함수 수정
   Future<DateTime?> _selectDate(
     BuildContext context, {
     required bool isStartDate,
     required String status,
   }) async {
-    DateTime initialDate = DateTime.now();
+    DateTime initialDate;
     DateTime firstDate;
     DateTime lastDate;
 
-    if (status == 'reading') {
+    // 시작 날짜 선택 시
+    if (isStartDate) {
+      initialDate = readingStartDate ?? DateTime.now();
       firstDate = DateTime(2000);
+      lastDate = readingDoneDate ?? DateTime.now();
+    } 
+    // 완료 날짜 선택 시
+    else {
+      initialDate = readingDoneDate ?? DateTime.now();
+      firstDate = readingStartDate ?? DateTime(2000);
       lastDate = DateTime.now();
-    } else if (status == 'not_started') {
-      firstDate = DateTime.now();
-      lastDate = DateTime.now().add(Duration(days: 365));
-    } else {
-      firstDate = DateTime(2000);
-      lastDate = DateTime.now().add(Duration(days: 365));
     }
 
     return await showDatePicker(
@@ -189,11 +191,16 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       initialDate: initialDate,
       firstDate: firstDate,
       lastDate: lastDate,
+      locale: const Locale('ko', 'KR'),
     );
   }
 
   // 상태 변경 다이얼로그 표시 함수 수정
   void _showReadingStateDialog() {
+    String tempState = readingState;
+    DateTime? tempStartDate = readingStartDate;
+    DateTime? tempDoneDate = readingDoneDate;
+
     showDialog(
       context: context,
       builder: (context) => StatefulBuilder(
@@ -206,37 +213,37 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ListTile(
                   title: Text('읽기 시작 날짜'),
                   subtitle: Text(
-                    readingStartDate != null
-                        ? DateFormat('yyyy-MM-dd').format(readingStartDate!)
+                    tempStartDate != null
+                        ? DateFormat('yyyy년 MM월 dd일').format(tempStartDate!)
                         : '날짜 선택',
                   ),
                   onTap: () async {
                     final date = await _selectDate(
                       context,
                       isStartDate: true,
-                      status: readingState,
+                      status: tempState,
                     );
                     if (date != null) {
-                      setState(() => readingStartDate = date);
+                      setState(() => tempStartDate = date);
                     }
                   },
                 ),
-                if (readingState == 'completed')
+                if (tempState == 'completed')
                   ListTile(
                     title: Text('읽기 완료 날짜'),
                     subtitle: Text(
-                      readingDoneDate != null
-                          ? DateFormat('yyyy-MM-dd').format(readingDoneDate!)
+                      tempDoneDate != null
+                          ? DateFormat('yyyy년 MM월 dd일').format(tempDoneDate!)
                           : '날짜 선택',
                     ),
                     onTap: () async {
                       final date = await _selectDate(
                         context,
                         isStartDate: false,
-                        status: readingState,
+                        status: tempState,
                       );
                       if (date != null) {
-                        setState(() => readingDoneDate = date);
+                        setState(() => tempDoneDate = date);
                       }
                     },
                   ),
@@ -244,27 +251,27 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                 ListTile(
                   title: Text('다 읽음'),
                   onTap: () {
-                    setState(() => readingState = 'completed');
+                    setState(() => tempState = 'completed');
                   },
-                  trailing: readingState == 'completed'
+                  trailing: tempState == 'completed'
                       ? Icon(Icons.check, color: Colors.green)
                       : null,
                 ),
                 ListTile(
                   title: Text('읽는 중'),
                   onTap: () {
-                    setState(() => readingState = 'reading');
+                    setState(() => tempState = 'reading');
                   },
-                  trailing: readingState == 'reading'
+                  trailing: tempState == 'reading'
                       ? Icon(Icons.check, color: Colors.blue)
                       : null,
                 ),
                 ListTile(
                   title: Text('읽을 예정'),
                   onTap: () {
-                    setState(() => readingState = 'not_started');
+                    setState(() => tempState = 'not_started');
                   },
-                  trailing: readingState == 'not_started'
+                  trailing: tempState == 'not_started'
                       ? Icon(Icons.check, color: Colors.grey)
                       : null,
                 ),
@@ -278,17 +285,27 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               TextButton(
                 child: Text('저장'),
                 onPressed: () async {
-                  if (readingStartDate == null) {
+                  // 상태별 유효성 검사
+                  if (tempStartDate == null) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('읽기 시작 날짜를 선택해주세요')),
                     );
                     return;
                   }
-                  if (readingState == 'completed' && readingDoneDate == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('읽기 완료 날짜를 선택해주세요')),
-                    );
-                    return;
+
+                  if (tempState == 'completed') {
+                    if (tempDoneDate == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('읽기 완료 날짜를 선택해주세요')),
+                      );
+                      return;
+                    }
+                    if (tempDoneDate!.isBefore(tempStartDate!)) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('완료 날짜는 시작 날짜보다 이후여야 합니다')),
+                      );
+                      return;
+                    }
                   }
 
                   try {
@@ -298,9 +315,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
                         .collection('books')
                         .doc(widget.bookId)
                         .update({
-                      'readingState': readingState,
-                      'readingStartDate': readingStartDate,
-                      'readingDoneDate': readingDoneDate,
+                      'readingState': tempState,
+                      'readingStartDate': tempStartDate,
+                      'readingDoneDate': tempState == 'completed' ? tempDoneDate : null,
+                    });
+
+                    setState(() {
+                      readingState = tempState;
+                      readingStartDate = tempStartDate;
+                      readingDoneDate = tempState == 'completed' ? tempDoneDate : null;
                     });
 
                     Navigator.pop(context);
