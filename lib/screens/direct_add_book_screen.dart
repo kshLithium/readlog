@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart'; // Image Picker 패키지
 import 'progress_check_screen.dart';
-import 'package:flutter/rendering.dart';
 import 'dart:async';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../services/api_config.dart';
 
 class DirectAddBookScreen extends StatefulWidget {
   final String? title;
@@ -82,26 +84,51 @@ class _DirectAddBookScreenState extends State<DirectAddBookScreen> {
   }
 
   void _pickImage() async {
-    if (!widget.isEditable) {
-      return;
-    }
+    if (!widget.isEditable) return;
+
+    final imgbbApiKey = ApiConfig.getImgbbApiKey(); // null이 아님이 보장됨
 
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      setState(() {
-        _thumbnailUrl = image.path;
-      });
-      await _calculateImageAspectRatio(image.path);
+      try {
+        // 로딩 표시
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이미지 업로드 중...')),
+        );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지를 선택했습니다.')),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('이미지 선택이 취소되었습니다.')),
-      );
+        final bytes = await image.readAsBytes();
+        final base64Image = base64Encode(bytes);
+
+        final response = await http.post(
+          Uri.parse('https://api.imgbb.com/1/upload'),
+          body: {
+            'key': imgbbApiKey,
+            'image': base64Image,
+          },
+        );
+
+        if (response.statusCode == 200) {
+          final jsonResponse = json.decode(response.body);
+          final imageUrl = jsonResponse['data']['url'];
+
+          setState(() {
+            _thumbnailUrl = imageUrl;
+          });
+          await _calculateImageAspectRatio(imageUrl);
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('이미지 업로드 완료')),
+          );
+        } else {
+          throw Exception('업로드 실패');
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('이미지 업로드 실패: $e')),
+        );
+      }
     }
   }
 

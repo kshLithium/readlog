@@ -59,7 +59,7 @@ class _BookSearchScreenState extends State<BookSearchScreen> {
     });
 
     try {
-      final apiKeys = ApiConfig.getApiKeys();
+      final apiKeys = ApiConfig.getNaverApiKeys();
       final String clientId = apiKeys['clientId'] ?? '';
       final String clientSecret = apiKeys['clientSecret'] ?? '';
 
