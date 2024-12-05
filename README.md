@@ -12,17 +12,23 @@
 
 ## 스크린샷
 
-<img src="screenshots/home.png" width="230">
-<img src="screenshots/library.png" width="230">
-<img src="screenshots/search.png" width="230">
-<img src="screenshots/memory.png" width="230">
-<img src="screenshots/edit_memory.png" width="230">
-<img src="screenshots/review.png" width="230">
-<img src="screenshots/mypage.png" width="230">
-<img src="screenshots/stat1.png" width="230">
-<img src="screenshots/stat2.png" width="230">
-
-
+<table>
+  <tr>
+    <td><img src="screenshots/home.png" width="230"></td>
+    <td><img src="screenshots/library.png" width="230"></td>
+    <td><img src="screenshots/search.png" width="230"></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/memory.png" width="230"></td>
+    <td><img src="screenshots/edit_memory.png" width="230"></td>
+    <td><img src="screenshots/review.png" width="230"></td>
+  </tr>
+  <tr>
+    <td><img src="screenshots/mypage.png" width="230"></td>
+    <td><img src="screenshots/stat1.png" width="230"></td>
+    <td><img src="screenshots/stat2.png" width="230"></td>
+  </tr>
+</table>
 
 ## 시작하기
 
