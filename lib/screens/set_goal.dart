@@ -11,7 +11,38 @@ class _SetGoalScreenState extends State<SetGoalScreen> {
   final TextEditingController _yearlyGoalController = TextEditingController();
   final TextEditingController _monthlyGoalController = TextEditingController();
 
+  bool _validateGoals() {
+    try {
+      final monthlyGoal = int.parse(_monthlyGoalController.text);
+      final yearlyGoal = int.parse(_yearlyGoalController.text);
+
+      if (monthlyGoal < 1 || monthlyGoal > 50) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('월간 목표는 1권에서 50권 사이로 설정해주세요')),
+        );
+        return false;
+      }
+
+      if (yearlyGoal < 1 || yearlyGoal > (monthlyGoal * 12)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('연간 목표는 1권에서 ${monthlyGoal * 12}권 사이로 설정해주세요')),
+        );
+        return false;
+      }
+
+      return true;
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('숫자만 입력해주세요')),
+      );
+      return false;
+    }
+  }
+
   Future<void> _saveGoals() async {
+    if (!_validateGoals()) return;
+
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user != null) {
