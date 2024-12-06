@@ -45,12 +45,23 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
   @override
   void dispose() {
     if (localRating > 0) {
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .collection('books')
-          .doc(widget.bookId)
-          .update({'rating': localRating});
+      try {
+        // 문서가 존재하는지 먼저 확인
+        FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('books')
+            .doc(widget.bookId)
+            .get()
+            .then((doc) {
+          if (doc.exists) {
+            // 문서가 존재할 때만 rating 업데이트
+            doc.reference.update({'rating': localRating});
+          }
+        });
+      } catch (e) {
+        print('Rating update failed: $e');
+      }
     }
     super.dispose();
   }
@@ -125,6 +136,15 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       );
 
       if (confirmDelete == true) {
+        // 로딩 표시
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return const Center(child: CircularProgressIndicator());
+          },
+        );
+
         final userDocRef =
             FirebaseFirestore.instance.collection('users').doc(user.uid);
         final bookDocRef = userDocRef.collection('books').doc(widget.bookId);
@@ -135,14 +155,30 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
           throw Exception('책을 찾을 수 없습니다.');
         }
 
+        // 리뷰 삭제
+        final reviewQuery = await FirebaseFirestore.instance
+            .collection('reviews')
+            .where('userId', isEqualTo: user.uid)
+            .where('bookId', isEqualTo: widget.bookId)
+            .get();
+
         // 트랜잭션으로 책 삭제와 카운트 감소를 동시에 처리
         await FirebaseFirestore.instance.runTransaction((transaction) async {
           // 현재 bookCount 가져오기
           final userDoc = await transaction.get(userDocRef);
+          if (!userDoc.exists) {
+            throw Exception('사용자 정보를 찾을 수 없습니다.');
+          }
+
           final currentCount = userDoc.data()?['bookCount'] ?? 1;
 
           // 책 삭제
           transaction.delete(bookDocRef);
+
+          // 리뷰가 있다면 삭제
+          for (var doc in reviewQuery.docs) {
+            transaction.delete(doc.reference);
+          }
 
           // bookCount 감소 (0 미만으로 내려가지 않도록)
           transaction.set(
@@ -151,24 +187,42 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
               SetOptions(merge: true));
         });
 
-        // 삭제 완료 메시지
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('책이 삭제되었습니다.')),
-        );
+        // 로딩 닫기
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
 
-        // MainLayout의 LibraryScreen으로 이동
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MainLayout(initialIndex: 1),
-          ),
-          (route) => false,
-        );
+        // 삭제 완료 메시지
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('책이 삭제되었습니다.')),
+          );
+
+          // MainLayout의 LibraryScreen으로 이동
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainLayout(initialIndex: 1),
+            ),
+            (route) => false,
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('삭제 중 오류가 발생했습니다: $e')),
-      );
+      // 로딩 닫기
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // 에러 메시지 표시
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('삭제 중 오류가 발생했습니다: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -178,30 +232,72 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
     required bool isStartDate,
     required String status,
   }) async {
-    DateTime initialDate = DateTime.now();
+    final now = DateTime.now();
+    DateTime initialDate;
     DateTime firstDate;
     DateTime lastDate;
 
-    if (status == 'reading') {
-      firstDate = DateTime(2000);
-      lastDate = DateTime.now();
-    } else if (status == 'not_started') {
-      firstDate = DateTime.now();
-      lastDate = DateTime.now().add(Duration(days: 365));
-    } else if (status == 'completed') {
-      firstDate = DateTime(2000);
-      lastDate = DateTime.now();
+    switch (status) {
+      case 'reading':
+        // 읽는 중: 과거부터 현재까지
+        firstDate = DateTime(2000);
+        lastDate = now;
+        initialDate = readingStartDate ?? now;
+        break;
 
-      if (!isStartDate && readingStartDate != null) {
-        firstDate = readingStartDate!;
-        initialDate = readingDoneDate ?? readingStartDate!;
-        if (initialDate.isAfter(lastDate)) {
-          initialDate = lastDate;
+      case 'not_started':
+        // 읽을 예정: 현재부터 1년 후까지
+        firstDate = now;
+        lastDate = now.add(Duration(days: 365));
+        initialDate = now;
+        break;
+
+      case 'completed':
+        if (!isStartDate) {
+          // 완료일 선택
+          if (readingStartDate == null) {
+            // 시작일이 없으면 선택 불가
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('먼저 읽기 시작 날짜를 선택해주세요')),
+            );
+            return null;
+          }
+          if (readingStartDate!.isAfter(now)) {
+            // 시작일이 미래면 선택 불가
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('읽기 시작 날짜가 미래로 설정되어 있습니다')),
+            );
+            return null;
+          }
+          // 시작일부터 현재까지만 선택 가능
+          firstDate = readingStartDate!;
+          lastDate = now;
+          initialDate = readingDoneDate ?? now;
+        } else {
+          // 시작일 선택: 과거부터 현재까지
+          firstDate = DateTime(2000);
+          lastDate = now;
+          initialDate = readingStartDate ?? now;
         }
-      }
-    } else {
-      firstDate = DateTime(2000);
-      lastDate = DateTime.now().add(Duration(days: 365));
+        break;
+
+      default:
+        firstDate = DateTime(2000);
+        lastDate = now.add(Duration(days: 365));
+        initialDate = now;
+    }
+
+    // 날짜 범위 조정
+    if (lastDate.isBefore(firstDate)) {
+      lastDate = firstDate;
+    }
+
+    // initialDate 조정
+    if (initialDate.isAfter(lastDate)) {
+      initialDate = lastDate;
+    }
+    if (initialDate.isBefore(firstDate)) {
+      initialDate = firstDate;
     }
 
     return await showDatePicker(
@@ -210,9 +306,8 @@ class _BookDetailScreenState extends State<BookDetailScreen> {
       firstDate: firstDate,
       lastDate: lastDate,
       locale: const Locale('ko', 'KR'),
-      selectableDayPredicate: status == 'completed'
-          ? (DateTime date) => !date.isAfter(DateTime.now())
-          : null,
+      selectableDayPredicate:
+          status == 'completed' ? (DateTime date) => !date.isAfter(now) : null,
     );
   }
 
